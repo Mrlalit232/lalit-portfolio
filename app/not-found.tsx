@@ -1,9 +1,11 @@
 import { ButtonLink, Container } from "@/components/ui/primitives";
+import { SiteShell } from "@/components/layout/SiteShell";
 
 export const metadata = { title: "Page not found", robots: { index: false } };
 
 export default function NotFound() {
   return (
+    <SiteShell>
     <Container className="grid min-h-[70vh] place-items-center pt-24 text-center">
       <div>
         <p className="font-mono text-xs uppercase tracking-[0.18em] text-tech">Error 404</p>
@@ -19,5 +21,6 @@ export default function NotFound() {
         </div>
       </div>
     </Container>
+    </SiteShell>
   );
 }

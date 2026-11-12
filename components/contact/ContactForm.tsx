@@ -3,7 +3,7 @@
 import { useActionState, useEffect, useId, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import { CheckCircle2, Loader2, TriangleAlert, Mail } from "lucide-react";
-import { submitContact } from "@/app/contact/actions";
+import { submitContact } from "@/app/(site)/contact/actions";
 import { initialContactState, inquiryTypes } from "@/lib/contact";
 import { cn } from "@/components/ui/primitives";
 
