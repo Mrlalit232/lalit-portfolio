@@ -38,3 +38,19 @@ Copy `.env.example` to `.env.local` for local work; set the same names in your h
 | `RESEND_API_KEY`, `CONTACT_TO_EMAIL`, `CONTACT_FROM_EMAIL` | Contact form delivery (server-only). Without these the form reports it is not configured and offers an email link |
 
 See `PROJECT_STATUS.md` for current status and limitations.
+
+## Admin CMS (in development, branch `cms`)
+
+Local development uses an embedded Postgres (PGlite, `.data/`, git-ignored): no account and no cost.
+Production uses Neon via `DATABASE_URL`.
+
+```bash
+npm run setup:local        # generates AUTH_SECRET in .env.local, creates the local database
+npm run admin:create       # interactive prompt: your email + password (hidden, never stored in files)
+npm run dev                # sign in at http://localhost:3000/admin/login
+npm test                   # unit tests (run from PowerShell/cmd on Windows, not Git Bash)
+npm run admin:reset-password   # recovery; needs database access
+```
+
+Hosted setup variables: `DATABASE_URL` (pooled), `DATABASE_URL_UNPOOLED` (migrations), `AUTH_SECRET` (32+ random chars).
+Apply migrations to the configured database with `npm run db:migrate`.
