@@ -1,6 +1,8 @@
 import Link from "next/link";
-import { ArrowRight, Cpu, Handshake, Sparkles } from "lucide-react";
+import { ArrowRight, Cpu, Download, Handshake, Sparkles } from "lucide-react";
 import { buildMetadata } from "@/lib/seo";
+import { site } from "@/lib/site";
+import { resumePdfAvailable } from "@/lib/resume";
 import { profile } from "@/data/profile";
 import { featuredProjects } from "@/data/projects";
 import { experience } from "@/data/experience";
@@ -53,6 +55,7 @@ const pillars = [
 ];
 
 export default function HomePage() {
+  const pdfReady = resumePdfAvailable();
   return (
     <>
       {/* Hero */}
@@ -75,15 +78,22 @@ export default function HomePage() {
               <p className="mt-6 max-w-xl text-lg leading-relaxed text-fg-muted">{profile.intro}</p>
               <div className="mt-9 flex flex-wrap gap-3">
                 <ButtonLink href="/projects">
-                  Explore My Work
+                  View Projects
                   <ArrowRight aria-hidden className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
                 </ButtonLink>
-                <ButtonLink href="/resume" variant="secondary">
-                  View Resume
+                <ButtonLink href="/contact" variant="secondary">
+                  Contact Me
                 </ButtonLink>
-                <ButtonLink href="/contact" variant="ghost">
-                  Let&apos;s Connect
-                </ButtonLink>
+                {pdfReady ? (
+                  <ButtonLink href={site.resumePdf} variant="ghost" download>
+                    <Download aria-hidden className="h-4 w-4" />
+                    Download Resume
+                  </ButtonLink>
+                ) : (
+                  <ButtonLink href="/resume" variant="ghost">
+                    View Resume
+                  </ButtonLink>
+                )}
               </div>
             </div>
 

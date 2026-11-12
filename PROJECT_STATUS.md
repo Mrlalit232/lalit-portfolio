@@ -25,8 +25,11 @@ All content is in `data/` (projects, ventures, experience, skills, credentials, 
 - Desktop nav verified at 1280/1920px; at 1024px the mobile menu is used by design.
 - Not run: automated accessibility audit (axe/Lighthouse), real email delivery, social-preview validators on a live URL.
 
+## CMS progress (branch `cms`)
+- Milestone 2 done: database, authentication, security foundation, tests. Admin shell, dashboard and content modules are the next milestones.
+
 ## Limitations / pending
-- LinkedIn URL and public email address not yet set (see env vars).
+- Email, LinkedIn, GitHub and location (Gurugram, Haryana, India) are set to the owner-verified values in `lib/site.ts`. LinkedIn blocks automated link checks (HTTP 999), so that URL could not be machine-verified.
 - Contact delivery not configured (`RESEND_API_KEY`, `CONTACT_TO_EMAIL`, `CONTACT_FROM_EMAIL`).
 - Resume PDF, project screenshots, custom domain pending. Each is a drop-in addition (no restructuring).
 - GitHub links exist only for BHIM; GenIQ and this portfolio have no public repository link yet.

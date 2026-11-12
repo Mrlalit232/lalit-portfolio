@@ -41,6 +41,15 @@ export const personJsonLd = {
   name: site.name,
   url: site.url,
   jobTitle: "Web Developer & QA Learner",
+  homeLocation: {
+    "@type": "Place",
+    address: {
+      "@type": "PostalAddress",
+      addressLocality: site.location.city,
+      addressRegion: site.location.region,
+      addressCountry: site.location.countryCode,
+    },
+  },
   description: site.description,
   knowsAbout: ["Web development", "Software testing", "Test automation", "Client management", "Digital marketing"],
   sameAs: [site.contact.linkedin, site.contact.github].filter(Boolean),

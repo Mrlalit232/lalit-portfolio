@@ -23,6 +23,7 @@ export function Footer() {
               <span className="text-tech">Technology</span> × <span className="text-business">Business</span> ×{" "}
               <span className="text-creative">Creativity</span>
             </p>
+            <p className="mt-3 text-sm text-fg-subtle">{site.location.label}</p>
             <p className="mt-4 max-w-sm text-sm leading-relaxed text-fg-subtle">
               Web development, QA and test automation, client and business management, operations and digital marketing.
             </p>

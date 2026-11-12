@@ -1,8 +1,7 @@
-import { existsSync } from "node:fs";
-import path from "node:path";
 import { Download } from "lucide-react";
 import { buildMetadata } from "@/lib/seo";
 import { site } from "@/lib/site";
+import { resumePdfAvailable } from "@/lib/resume";
 import { profile } from "@/data/profile";
 import { experience } from "@/data/experience";
 import { projects } from "@/data/projects";
@@ -31,9 +30,9 @@ function RSection({ title, children }: { title: string; children: React.ReactNod
 
 export default function ResumePage() {
   // Checked at build time: the download button only appears when the real file exists.
-  const pdfAvailable = existsSync(path.join(process.cwd(), "public", site.resumePdf));
+  const pdfAvailable = resumePdfAvailable();
   const { email, linkedin, github } = site.contact;
-  const contactItems = [email, linkedin, github].filter(Boolean) as string[];
+  const contactItems = [email, site.location.label, linkedin, github].filter(Boolean) as string[];
 
   return (
     <>

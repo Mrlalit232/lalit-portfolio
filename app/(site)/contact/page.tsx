@@ -58,6 +58,7 @@ export default function ContactPage() {
 
           <div>
             <h2 className="font-mono text-xs uppercase tracking-[0.18em] text-fg-subtle">Direct</h2>
+            <p className="mt-4 text-sm text-fg-muted">Based in {site.location.label}</p>
             {direct.length > 0 ? (
               <ul className="mt-4 space-y-2">
                 {direct.map((d) => (
