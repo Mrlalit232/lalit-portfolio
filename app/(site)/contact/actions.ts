@@ -1,6 +1,7 @@
 "use server";
 
 import { headers } from "next/headers";
+import { getProfile } from "@/lib/content/public";
 import { contactSchema, inquiryTypes, type ContactInput, type ContactState } from "@/lib/contact";
 
 /**
@@ -81,7 +82,7 @@ export async function submitContact(_prev: ContactState, formData: FormData): Pr
 
   if (!apiKey || !to || !from) {
     // Nothing is sent, so never report success.
-    const publicEmail = process.env.NEXT_PUBLIC_CONTACT_EMAIL;
+    const publicEmail = (await getProfile()).contact.email;
     const mailto = publicEmail
       ? `mailto:${publicEmail}?subject=${encodeURIComponent(`${typeLabel} from ${data.name}`)}&body=${encodeURIComponent(data.message)}`
       : undefined;

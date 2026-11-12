@@ -1,22 +1,22 @@
+import { Suspense } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { connection } from "next/server";
 import type { Metadata } from "next";
 import { ArrowLeft, ArrowRight, ImageOff } from "lucide-react";
-import { getProject, projects } from "@/data/projects";
+import { getProject, getProjects } from "@/lib/content/public";
 import { buildMetadata } from "@/lib/seo";
 import { absoluteUrl, site } from "@/lib/site";
 import { Badge, ButtonLink, CheckList, Container, Section } from "@/components/ui/primitives";
 import { Reveal } from "@/components/ui/motion";
 import { ContactCta } from "@/components/sections/shared";
 
-export function generateStaticParams() {
-  return projects.map((p) => ({ slug: p.slug }));
-}
-
 export async function generateMetadata({ params }: PageProps<"/projects/[slug]">): Promise<Metadata> {
+  // Request-time on purpose: a project published after the build must never get a stale "not found" head.
+  await connection();
   const { slug } = await params;
-  const project = getProject(slug);
+  const project = await getProject(slug);
   if (!project) return {};
   return buildMetadata({
     title: `${project.title}: Case Study`,
@@ -51,15 +51,31 @@ function Block({
 
 const paras = (items: string[]) => items.map((t) => <p key={t}>{t}</p>);
 
-export default async function ProjectPage({ params }: PageProps<"/projects/[slug]">) {
+/**
+ * Case studies are managed in the CMS, so each one is resolved per request (the data itself still comes
+ * from the tagged cache). The static shell therefore never contains project-specific content, which avoids
+ * caching a "not found" shell for slugs created after the build. proxy.ts returns a real HTTP 404 for
+ * unknown slugs before this page renders.
+ */
+export default function ProjectPage({ params }: PageProps<"/projects/[slug]">) {
+  return (
+    <Suspense fallback={<div className="min-h-[60vh]" aria-hidden />}>
+      <ProjectBody params={params} />
+    </Suspense>
+  );
+}
+
+async function ProjectBody({ params }: { params: PageProps<"/projects/[slug]">["params"] }) {
+  await connection();
   const { slug } = await params;
-  const project = getProject(slug);
+  const project = await getProject(slug);
   if (!project) notFound();
 
   const { caseStudy: cs } = project;
   // Sequential section numbers, so an omitted section never leaves a gap.
   let counter = 0;
   const num = () => String(++counter).padStart(2, "0");
+  const projects = await getProjects();
   const index = projects.findIndex((p) => p.slug === project.slug);
   const next = projects[(index + 1) % projects.length];
 

@@ -3,11 +3,11 @@ import { ArrowUpRight } from "lucide-react";
 import type { Project } from "@/data/types";
 import { Badge } from "@/components/ui/primitives";
 
-const categoryAccent = {
+const categoryAccent: Record<string, "tech" | "business" | "creative"> = {
   "AI & Software": "creative",
   "Web Platforms": "tech",
   "Personal Brand": "business",
-} as const;
+};
 
 export function ProjectCard({ project, index }: { project: Project; index?: number }) {
   return (
@@ -17,7 +17,7 @@ export function ProjectCard({ project, index }: { project: Project; index?: numb
         className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full bg-tech/10 opacity-0 blur-3xl transition-opacity duration-500 group-hover:opacity-100"
       />
       <div className="flex items-center justify-between gap-3">
-        <Badge accent={categoryAccent[project.category]}>{project.category}</Badge>
+        <Badge accent={categoryAccent[project.category] ?? "tech"}>{project.category}</Badge>
         {index !== undefined && (
           <span aria-hidden className="font-mono text-xs text-fg-subtle">
             {String(index + 1).padStart(2, "0")}

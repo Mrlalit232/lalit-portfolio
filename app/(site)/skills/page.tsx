@@ -1,6 +1,6 @@
 import { buildMetadata } from "@/lib/seo";
-import { credentials } from "@/data/credentials";
-import { proficiencyNote, skillGroups } from "@/data/skills";
+import { proficiencyNote } from "@/data/skills";
+import { getCredentials, getSkillGroups } from "@/lib/content/public";
 import { PageHero, Section, SectionHeading } from "@/components/ui/primitives";
 import { Reveal } from "@/components/ui/motion";
 import { ContactCta, CredentialGrid, SkillGroups } from "@/components/sections/shared";
@@ -19,7 +19,8 @@ const levels = [
   ["Learning & practising", "Actively building proficiency."],
 ];
 
-export default function SkillsPage() {
+export default async function SkillsPage() {
+  const [credentials, skillGroups] = await Promise.all([getCredentials(), getSkillGroups()]);
   return (
     <>
       <PageHero

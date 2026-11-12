@@ -10,5 +10,6 @@ export function getAuthSecret() {
 /** Admin needs a hosted database in production; the embedded database is for local development only. */
 export function isAdminConfigured() {
   if (process.env.NODE_ENV !== "production") return true;
-  return Boolean(process.env.DATABASE_URL) && Boolean(process.env.AUTH_SECRET);
+  const hasDb = Boolean(process.env.DATABASE_URL) || process.env.ALLOW_LOCAL_DB === "1";
+  return hasDb && Boolean(process.env.AUTH_SECRET);
 }

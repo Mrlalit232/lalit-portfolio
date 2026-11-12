@@ -39,18 +39,29 @@ Copy `.env.example` to `.env.local` for local work; set the same names in your h
 
 See `PROJECT_STATUS.md` for current status and limitations.
 
-## Admin CMS (in development, branch `cms`)
+## Admin CMS (branch `cms`)
+
+Manage the portfolio at `/admin` (private, never indexed): Profile, Projects, Skills, Experience, Education,
+Certifications, Ventures and Testimonials, each with Add / Edit / Duplicate / Archive / Delete (Trash + restore),
+Save draft, Publish, Unpublish, reorder, search and an activity log. Edits to a published item stay private
+until you publish. The public site shows only published content.
 
 Local development uses an embedded Postgres (PGlite, `.data/`, git-ignored): no account and no cost.
-Production uses Neon via `DATABASE_URL`.
+Production uses Neon via `DATABASE_URL`. **Only one process may use the local database at a time**
+(stop `next dev` before running the scripts below).
 
 ```bash
-npm run setup:local        # generates AUTH_SECRET in .env.local, creates the local database
+npm run setup:local        # generates AUTH_SECRET in .env.local, applies migrations to the local database
+npm run db:seed            # imports your existing content (data/*.ts) as published; never overwrites edits
 npm run admin:create       # interactive prompt: your email + password (hidden, never stored in files)
 npm run dev                # sign in at http://localhost:3000/admin/login
 npm test                   # unit tests (run from PowerShell/cmd on Windows, not Git Bash)
 npm run admin:reset-password   # recovery; needs database access
 ```
 
+If the database is unreachable or has never been seeded, the public site serves the built-in content from `data/`.
+Without `DATABASE_URL` in production the admin shows "not configured" and the public site still works.
+
 Hosted setup variables: `DATABASE_URL` (pooled), `DATABASE_URL_UNPOOLED` (migrations), `AUTH_SECRET` (32+ random chars).
-Apply migrations to the configured database with `npm run db:migrate`.
+Apply migrations with `npm run db:migrate`, then `npm run db:seed`.
+`ALLOW_LOCAL_DB=1` lets a *local* production build use the embedded database for testing. Never set it on a real deployment.

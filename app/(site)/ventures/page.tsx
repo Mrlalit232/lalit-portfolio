@@ -1,5 +1,5 @@
 import { buildMetadata } from "@/lib/seo";
-import { ventures } from "@/data/ventures";
+import { getVentures } from "@/lib/content/public";
 import { PageHero, Section, SectionHeading } from "@/components/ui/primitives";
 import { Reveal } from "@/components/ui/motion";
 import { ContactCta } from "@/components/sections/shared";
@@ -12,7 +12,8 @@ export const metadata = buildMetadata({
   path: "/ventures",
 });
 
-export default function VenturesPage() {
+export default async function VenturesPage() {
+  const ventures = await getVentures();
   const active = ventures.filter((v) => v.stage === "active");
   const concepts = ventures.filter((v) => v.stage === "concept");
 

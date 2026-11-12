@@ -1,9 +1,10 @@
 import type { MetadataRoute } from "next";
 import { primaryNav, resumeNav } from "@/data/navigation";
-import { projects } from "@/data/projects";
+import { getProjects } from "@/lib/content/public";
 import { absoluteUrl } from "@/lib/site";
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const projects = await getProjects();
   const pages = [...primaryNav, resumeNav].map((p) => ({
     url: absoluteUrl(p.href),
     changeFrequency: "monthly" as const,

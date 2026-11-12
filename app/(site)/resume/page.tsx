@@ -2,11 +2,7 @@ import { Download } from "lucide-react";
 import { buildMetadata } from "@/lib/seo";
 import { site } from "@/lib/site";
 import { resumePdfAvailable } from "@/lib/resume";
-import { profile } from "@/data/profile";
-import { experience } from "@/data/experience";
-import { projects } from "@/data/projects";
-import { skillGroups } from "@/data/skills";
-import { credentials } from "@/data/credentials";
+import { getCredentials, getExperience, getProfile, getProjects, getSkillGroups } from "@/lib/content/public";
 import { ButtonLink, Container } from "@/components/ui/primitives";
 import { PrintButton } from "@/components/sections/PrintButton";
 
@@ -28,11 +24,12 @@ function RSection({ title, children }: { title: string; children: React.ReactNod
   );
 }
 
-export default function ResumePage() {
+export default async function ResumePage() {
+  const [profile, experience, projects, skillGroups, credentials] = await Promise.all([getProfile(), getExperience(), getProjects(), getSkillGroups(), getCredentials()]);
   // Checked at build time: the download button only appears when the real file exists.
   const pdfAvailable = resumePdfAvailable();
-  const { email, linkedin, github } = site.contact;
-  const contactItems = [email, site.location.label, linkedin, github].filter(Boolean) as string[];
+  const { email, linkedin, github, location } = profile.contact;
+  const contactItems = [email, location, linkedin, github].filter(Boolean) as string[];
 
   return (
     <>

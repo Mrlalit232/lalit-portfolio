@@ -1,6 +1,6 @@
 import { GraduationCap } from "lucide-react";
 import { buildMetadata } from "@/lib/seo";
-import { profile } from "@/data/profile";
+import { getProfile } from "@/lib/content/public";
 import { Badge, PageHero, Section, SectionHeading } from "@/components/ui/primitives";
 import { Reveal } from "@/components/ui/motion";
 import { ContactCta } from "@/components/sections/shared";
@@ -12,7 +12,8 @@ export const metadata = buildMetadata({
   path: "/about",
 });
 
-export default function AboutPage() {
+export default async function AboutPage() {
+  const profile = await getProfile();
   return (
     <>
       <PageHero

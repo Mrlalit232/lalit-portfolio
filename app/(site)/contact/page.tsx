@@ -3,7 +3,7 @@ import { Suspense } from "react";
 import { Briefcase, Handshake, Mail, Rocket } from "lucide-react";
 import { GithubIcon, LinkedinIcon } from "@/components/ui/icons";
 import { buildMetadata } from "@/lib/seo";
-import { site } from "@/lib/site";
+import { getProfile } from "@/lib/content/public";
 import { ContactForm } from "@/components/contact/ContactForm";
 import { Container, PageHero } from "@/components/ui/primitives";
 
@@ -20,8 +20,9 @@ const reasons = [
   { icon: Handshake, title: "Collaboration", text: "Partnerships, marketing support and shared projects." },
 ];
 
-export default function ContactPage() {
-  const { email, linkedin, github } = site.contact;
+export default async function ContactPage() {
+  const { contact } = await getProfile();
+  const { email, linkedin, github, location } = contact;
   const direct = [
     email && { icon: Mail, label: "Email", value: email, href: `mailto:${email}` },
     linkedin && { icon: LinkedinIcon, label: "LinkedIn", value: "Connect on LinkedIn", href: linkedin },
@@ -58,7 +59,7 @@ export default function ContactPage() {
 
           <div>
             <h2 className="font-mono text-xs uppercase tracking-[0.18em] text-fg-subtle">Direct</h2>
-            <p className="mt-4 text-sm text-fg-muted">Based in {site.location.label}</p>
+            <p className="mt-4 text-sm text-fg-muted">Based in {location}</p>
             {direct.length > 0 ? (
               <ul className="mt-4 space-y-2">
                 {direct.map((d) => (

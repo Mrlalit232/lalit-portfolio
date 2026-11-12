@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { Suspense, type ReactNode } from "react";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { personJsonLd } from "@/lib/seo";
@@ -17,7 +17,10 @@ export function SiteShell({ children }: { children: ReactNode }) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(personJsonLd).replace(/</g, "\u003c") }}
       />
-      <Header />
+      {/* usePathname() is request-time on dynamic routes (e.g. /projects/[slug]); the placeholder keeps layout stable. */}
+      <Suspense fallback={<div aria-hidden className="fixed inset-x-0 top-0 z-50 h-16" />}>
+        <Header />
+      </Suspense>
       <main id="main" className="flex-1">
         {children}
       </main>

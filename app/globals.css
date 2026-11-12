@@ -135,3 +135,35 @@ body {
     margin: 14mm;
   }
 }
+
+/* ---------- Admin light theme (scoped; the public site is unaffected) ---------- */
+html[data-admin-theme="light"] .admin-scope {
+  color-scheme: light;
+  --ink-950: #f5f6f8;
+  --ink-900: #ffffff;
+  --ink-800: #eceef2;
+  --ink-700: #e1e5ec;
+  --ink-600: #cdd3de;
+  --line: rgb(15 23 42 / 0.1);
+  --line-strong: rgb(15 23 42 / 0.22);
+  --fg: #0f172a;
+  --fg-muted: #475569;
+  --fg-subtle: #64748b;
+  --tech: #0369a1;
+  --business: #b45309;
+  --creative: #6d28d9;
+}
+html[data-admin-theme="light"] .admin-scope .surface {
+  background: #ffffff;
+  box-shadow: 0 1px 2px rgb(15 23 42 / 0.06);
+}
+html[data-admin-theme="light"] .admin-scope .hover\:bg-white\/\[0\.06\]:hover,
+html[data-admin-theme="light"] .admin-scope .hover\:bg-white\/\[0\.04\]:hover {
+  background: rgb(15 23 42 / 0.06);
+}
+html[data-admin-theme="light"] .admin-scope .bg-white\/\[0\.08\] {
+  background: rgb(15 23 42 / 0.08);
+}
+html[data-admin-theme="light"] .admin-scope .bg-white\/\[0\.06\] {
+  background: rgb(15 23 42 / 0.08);
+}

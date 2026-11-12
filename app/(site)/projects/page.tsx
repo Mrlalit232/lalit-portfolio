@@ -1,5 +1,5 @@
 import { buildMetadata } from "@/lib/seo";
-import { projectCategories, projects } from "@/data/projects";
+import { getProjects } from "@/lib/content/public";
 import { PageHero } from "@/components/ui/primitives";
 import { Container } from "@/components/ui/primitives";
 import { ProjectExplorer } from "@/components/projects/ProjectExplorer";
@@ -12,7 +12,9 @@ export const metadata = buildMetadata({
   path: "/projects",
 });
 
-export default function ProjectsPage() {
+export default async function ProjectsPage() {
+  const projects = await getProjects();
+  const projectCategories = ["All", ...Array.from(new Set(projects.map((p) => p.category)))];
   return (
     <>
       <PageHero

@@ -3,13 +3,8 @@ import { ArrowRight, Cpu, Download, Handshake, Sparkles } from "lucide-react";
 import { buildMetadata } from "@/lib/seo";
 import { site } from "@/lib/site";
 import { resumePdfAvailable } from "@/lib/resume";
-import { profile } from "@/data/profile";
-import { featuredProjects } from "@/data/projects";
-import { experience } from "@/data/experience";
-import { skillGroups } from "@/data/skills";
 import { services } from "@/data/services";
-import { credentials } from "@/data/credentials";
-import { ventures } from "@/data/ventures";
+import { getCredentials, getExperience, getProfile, getProjects, getSkillGroups, getTestimonials, getVentures } from "@/lib/content/public";
 import { ButtonLink, Container, Section, SectionHeading, accentDot, cn } from "@/components/ui/primitives";
 import { Reveal, Stagger, StaggerItem } from "@/components/ui/motion";
 import { ProjectCard } from "@/components/projects/ProjectCard";
@@ -18,6 +13,7 @@ import {
   ContactCta,
   CredentialGrid,
   ExperienceCard,
+  TestimonialGrid,
   ServiceGrid,
   SkillGroups,
 } from "@/components/sections/shared";
@@ -54,8 +50,18 @@ const pillars = [
   },
 ];
 
-export default function HomePage() {
+export default async function HomePage() {
   const pdfReady = resumePdfAvailable();
+  const [profile, projects, experience, skillGroups, credentials, ventures, testimonials] = await Promise.all([
+    getProfile(),
+    getProjects(),
+    getExperience(),
+    getSkillGroups(),
+    getCredentials(),
+    getVentures(),
+    getTestimonials(),
+  ]);
+  const featuredProjects = projects.filter((p) => p.featured);
   return (
     <>
       {/* Hero */}
@@ -289,6 +295,18 @@ export default function HomePage() {
           <CredentialGrid items={credentials} />
         </div>
       </Section>
+
+      {/* Testimonials: only genuine, published ones; hidden entirely when there are none */}
+      {testimonials.length > 0 && (
+        <Section labelledBy="testimonials-heading" className="border-t border-line">
+          <Reveal>
+            <SectionHeading eyebrow="Testimonials" accent="creative" title={<span id="testimonials-heading">What people say.</span>} />
+          </Reveal>
+          <div className="mt-12">
+            <TestimonialGrid items={testimonials} />
+          </div>
+        </Section>
+      )}
 
       {/* H. Contact CTA */}
       <ContactCta />

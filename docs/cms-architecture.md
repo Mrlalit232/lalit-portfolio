@@ -226,3 +226,12 @@ Each milestone: separate commits on a `cms` branch, no push without your approva
 3. **Vercel plan**: confirm you are comfortable with Hobby terms, or plan to use Pro.
 4. **Analytics provider** (Vercel Web Analytics, Plausible, other, or none): decide before Milestone 6; first release can ship without it.
 5. **Admin login email**: you will enter it at the CLI prompt in Milestone 2. Do not send it or any password in chat.
+
+---
+
+## 11. Implementation notes (Milestones 3 and 4)
+
+- **Single content table.** Instead of one table per entity, every managed type lives in `content_items` (`data` = live copy, `draft` = unpublished overlay, `status`, `deleted_at`, `sort_order`, partial-unique `(type, slug)`), with a Zod schema per type (`lib/content/schemas.ts`) validating every write. This gave all eight modules one consistent, tested engine. The trade-off is weaker relational constraints than dedicated tables.
+- **Case-study pages are request-time.** Combining `generateStaticParams` with the tagged cache caused a first-render race for projects published after the build (a cached "not found" shell with `noindex`). `/projects/[slug]` now resolves its project per request inside `Suspense`; `proxy.ts` still returns a real 404 for unknown slugs using `/api/slugs` with a short in-memory cache (valid-slug changes take effect within ~10 s at the proxy).
+- **Cache invalidation** is `updateTag("content:<type>")` from the admin Server Actions. Verified against a production build using the embedded database; behaviour on Vercel is still to be verified after deployment.
+- **Changing a published project's slug** changes its public URL and does not create a redirect (the redirect manager is not built).

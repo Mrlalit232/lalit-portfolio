@@ -25,8 +25,13 @@ All content is in `data/` (projects, ventures, experience, skills, credentials, 
 - Desktop nav verified at 1280/1920px; at 1024px the mobile menu is used by design.
 - Not run: automated accessibility audit (axe/Lighthouse), real email delivery, social-preview validators on a live URL.
 
-## CMS progress (branch `cms`)
-- Milestone 2 done: database, authentication, security foundation, tests. Admin shell, dashboard and content modules are the next milestones.
+## CMS progress (branch `cms`, not merged, not pushed, not deployed)
+- Milestone 2: database, authentication, security foundation.
+- Milestone 3: admin shell (responsive sidebar, breadcrumbs, search, light/dark theme, account menu, toasts, confirm dialogs, skeletons) and a dashboard driven by real queries.
+- Milestone 4: CMS for Profile, Projects, Skills, Experience, Education, Certifications, Ventures, Testimonials with draft overlay, Publish/Unpublish, Archive, Trash/Restore/Delete forever, Duplicate, Reorder, validation, activity log. Public site reads published content from the database (tagged cache), falling back to `data/` when the database is unavailable or unseeded.
+- Verified: 33 unit tests (Postgres), 18 authentication and 86 CMS browser checks against a production build, public regression (288/293, the 5 non-passes are the intentional 404 console logs), and a no-database run.
+- Not built (out of scope this round): media library/uploads (images are URLs), revision history, scheduled publishing, preview links, bulk actions, pages/sections and navigation managers, SEO manager, redirects, contact-message inbox, analytics, JSON export.
+- Design note: all content types share one `content_items` table (live `data` + `draft` overlay, validated by a Zod schema per type) instead of one table per type. Relational tables can be introduced later.
 
 ## Limitations / pending
 - Email, LinkedIn, GitHub and location (Gurugram, Haryana, India) are set to the owner-verified values in `lib/site.ts`. LinkedIn blocks automated link checks (HTTP 999), so that URL could not be machine-verified.

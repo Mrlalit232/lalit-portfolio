@@ -28,7 +28,8 @@ export async function createDb(opts: { url?: string; pgliteDir?: string | null }
     const pool = new Pool({ connectionString: url });
     return { db: drizzle(pool, { schema }) as unknown as Db, kind: "neon", close: () => pool.end() };
   }
-  if (process.env.NODE_ENV === "production") {
+  // Escape hatch ONLY for testing a production build on your own machine. Never set on a real deployment.
+  if (process.env.NODE_ENV === "production" && process.env.ALLOW_LOCAL_DB !== "1") {
     throw new Error("DATABASE_URL is not set. The embedded local database is not allowed in production.");
   }
   const { PGlite } = await import("@electric-sql/pglite");

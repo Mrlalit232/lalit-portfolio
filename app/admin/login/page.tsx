@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import { redirect } from "next/navigation";
+import { connection } from "next/server";
 import { ShieldCheck } from "lucide-react";
 import { getSession } from "@/lib/auth/guard";
 import { isAdminConfigured } from "@/lib/auth/env";
@@ -7,6 +8,8 @@ import { LoginForm } from "./LoginForm";
 
 /** Redirects already-signed-in administrators; reads cookies, so it lives behind Suspense. */
 async function LoginGate() {
+  // Environment is read per request, never frozen into the prerendered shell at build time.
+  await connection();
   if (!isAdminConfigured()) {
     return (
       <p role="alert" className="rounded-2xl border border-line-strong p-4 text-sm text-fg-muted">

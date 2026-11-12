@@ -1,5 +1,6 @@
 import { buildMetadata } from "@/lib/seo";
-import { activities, experience } from "@/data/experience";
+import { activities } from "@/data/experience";
+import { getExperience } from "@/lib/content/public";
 import { PageHero, Section, SectionHeading } from "@/components/ui/primitives";
 import { Reveal } from "@/components/ui/motion";
 import { ContactCta, ExperienceCard } from "@/components/sections/shared";
@@ -11,7 +12,8 @@ export const metadata = buildMetadata({
   path: "/experience",
 });
 
-export default function ExperiencePage() {
+export default async function ExperiencePage() {
+  const experience = await getExperience();
   return (
     <>
       <PageHero

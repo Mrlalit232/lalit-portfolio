@@ -147,6 +147,28 @@ export function ServiceGrid({ items, preview = false }: { items: Service[]; prev
   );
 }
 
+/* ---------------- Testimonials ---------------- */
+export function TestimonialGrid({ items }: { items: { name: string; designation: string; organization: string; text: string }[] }) {
+  return (
+    <Stagger className="grid gap-5 md:grid-cols-2">
+      {items.map((t) => (
+        <StaggerItem key={`${t.name}-${t.organization}`} className="h-full">
+          <figure className="surface h-full rounded-3xl p-6">
+            <blockquote className="leading-relaxed text-fg">&ldquo;{t.text}&rdquo;</blockquote>
+            <figcaption className="mt-5 text-sm">
+              <span className="font-medium text-fg">{t.name}</span>
+              <span className="text-fg-muted">
+                {" "}
+                · {t.designation}, {t.organization}
+              </span>
+            </figcaption>
+          </figure>
+        </StaggerItem>
+      ))}
+    </Stagger>
+  );
+}
+
 /* ---------------- Contact CTA ---------------- */
 export function ContactCta({
   title = "Let's build something useful.",
