@@ -7,7 +7,8 @@ import { revokeAllSessions } from "./sessions";
 
 export const normalizeEmail = (email: string) => email.trim().toLowerCase();
 
-export async function createAdminUser(db: Db, input: { email: string; password: string; name?: string }) {
+/** `role` defaults to owner (the only account type the CLI creates). Editors exist for tests and future multi-user use. */
+export async function createAdminUser(db: Db, input: { email: string; password: string; name?: string; role?: "owner" | "editor" }) {
   const email = normalizeEmail(input.email);
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) throw new Error("Invalid email address.");
   const weak = checkPasswordStrength(input.password, email);
@@ -16,14 +17,14 @@ export async function createAdminUser(db: Db, input: { email: string; password: 
   if (existing) throw new Error("An account with this email already exists.");
   const [user] = await db
     .insert(users)
-    .values({ email, name: input.name, passwordHash: await hashPassword(input.password), role: "owner" })
+    .values({ email, name: input.name, passwordHash: await hashPassword(input.password), role: input.role ?? "owner" })
     .returning();
   await logActivity(db, {
     actorId: user.id,
     action: "user.create",
     entityType: "user",
     entityId: user.id,
-    summary: "Administrator account created",
+    summary: input.role === "editor" ? "Editor account created" : "Administrator account created",
   });
   return user;
 }

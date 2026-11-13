@@ -76,7 +76,7 @@ export function Section({
   labelledBy?: string;
 }) {
   return (
-    <section id={id} aria-labelledby={labelledBy} className={cn("py-16 sm:py-24", className)}>
+    <section id={id} aria-labelledby={labelledBy} className={cn("defer-render py-16 sm:py-24", className)}>
       <Container>{children}</Container>
     </section>
   );

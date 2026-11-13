@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useId, useRef, useState } from "react";
-import { AnimatePresence, m } from "motion/react";
 import { Menu, X } from "lucide-react";
 import { primaryNav, resumeNav } from "@/data/navigation";
 import { cn } from "@/components/ui/primitives";
@@ -76,14 +75,15 @@ export function Header() {
       )}
     >
       <div className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between px-4 sm:px-6 lg:px-8">
-        <Link href="/" className="group flex items-center gap-3" aria-label="Lalit Kumar Saini, home">
+        <Link href="/" className="group flex items-center gap-3">
           <span
             aria-hidden
             className="grid h-9 w-9 place-items-center rounded-xl border border-line-strong bg-white/[0.04] font-display text-lg leading-none text-fg transition-colors group-hover:border-tech/60"
           >
             L
           </span>
-          <span className="hidden text-sm font-medium tracking-tight text-fg sm:block">Lalit Kumar Saini</span>
+          {/* Visible from sm up; always available to screen readers (the accessible name matches the visible text). */}
+          <span className="sr-only text-sm font-medium tracking-tight text-fg sm:not-sr-only">Lalit Kumar Saini</span>
         </Link>
 
         <nav aria-label="Primary" className="hidden items-center gap-1 xl:flex">
@@ -100,11 +100,9 @@ export function Header() {
                 )}
               >
                 {active && (
-                  <m.span
-                    layoutId="nav-active"
+                  <span
                     aria-hidden
-                    className="absolute inset-0 -z-10 rounded-full border border-line-strong bg-white/[0.06]"
-                    transition={{ type: "spring", stiffness: 380, damping: 32 }}
+                    className="nav-pill absolute inset-0 -z-10 rounded-full border border-line-strong bg-white/[0.06]"
                   />
                 )}
                 {item.label}
@@ -134,16 +132,11 @@ export function Header() {
         </div>
       </div>
 
-      <AnimatePresence>
-        {open && (
-          <m.div
+      {open && (
+          <div
             id={menuId}
             ref={panelRef}
-            initial={{ opacity: 0, y: -8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.2 }}
-            className="absolute inset-x-0 top-16 h-[calc(100dvh-4rem)] overflow-y-auto border-t border-line bg-ink-950/95 backdrop-blur-xl xl:hidden"
+            className="menu-in absolute inset-x-0 top-16 h-[calc(100dvh-4rem)] overflow-y-auto border-t border-line bg-ink-950/95 backdrop-blur-xl xl:hidden"
           >
             <nav aria-label="Mobile" className="mx-auto flex max-w-6xl flex-col gap-1 px-4 py-6 sm:px-6">
               {[...primaryNav, resumeNav].map((item) => {
@@ -164,9 +157,8 @@ export function Header() {
                 );
               })}
             </nav>
-          </m.div>
-        )}
-      </AnimatePresence>
+          </div>
+      )}
     </header>
   );
 }

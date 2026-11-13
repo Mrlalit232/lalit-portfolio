@@ -10,6 +10,7 @@ import { seedContent } from "../lib/content/seed";
 import { createAdminUser, findUserByEmail } from "../lib/auth/users";
 
 const ADMIN_EMAIL = "e2e-admin@example.test";
+const EDITOR_EMAIL = "e2e-editor@example.test";
 
 async function main() {
   const dir = process.env.PGLITE_DIR;
@@ -23,8 +24,9 @@ async function main() {
   await runMigrations(handle);
   const seeded = await seedContent(handle.db);
   if (!(await findUserByEmail(handle.db, ADMIN_EMAIL))) await createAdminUser(handle.db, { email: ADMIN_EMAIL, password, name: "E2E Admin" });
+  if (!(await findUserByEmail(handle.db, EDITOR_EMAIL))) await createAdminUser(handle.db, { email: EDITOR_EMAIL, password, name: "E2E Editor", role: "editor" });
   await handle.close();
-  console.log(`Test database ready in ${dir}: ${seeded.created} items seeded, test admin ${ADMIN_EMAIL}.`);
+  console.log(`Test database ready in ${dir}: ${seeded.created} items seeded, test owner ${ADMIN_EMAIL}, test editor ${EDITOR_EMAIL}.`);
 }
 
 main().catch((error) => {

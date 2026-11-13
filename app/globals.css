@@ -72,6 +72,59 @@ body {
     transform: none;
   }
 }
+.nav-pill {
+  animation: fade-in 0.25s ease-out both;
+}
+.menu-in {
+  animation: menu-in 0.2s ease-out both;
+}
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes menu-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+/* Scroll-driven reveal for below-the-fold content. Unsupported browsers just show the content. */
+/* Skip layout/paint of off-screen sections until they are near the viewport (cuts initial style/layout work). */
+.defer-render {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 700px;
+}
+@media print {
+  .defer-render {
+    content-visibility: visible;
+  }
+}
+/* Slide only (no opacity change): text stays fully visible and contrast-compliant even before it scrolls into view. */
+@keyframes reveal-in {
+  from {
+    transform: translateY(18px);
+  }
+  to {
+    transform: none;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .reveal {
+      animation: reveal-in linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 40%;
+    }
+  }
+}
 .page-in {
   animation: page-in 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
 }

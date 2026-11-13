@@ -2,7 +2,6 @@ import { Suspense } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { connection } from "next/server";
 import type { Metadata } from "next";
 import { ArrowRight, ImageOff } from "lucide-react";
 import { getProject, getProjects } from "@/lib/content/public";
@@ -13,9 +12,16 @@ import { Badge, ButtonLink, CheckList, Container, Section } from "@/components/u
 import { Reveal } from "@/components/ui/motion";
 import { ContactCta } from "@/components/sections/shared";
 
+/**
+ * Known (published) slugs are prerendered, so their <title>, description and Open Graph tags are in <head> for
+ * every client. Slugs published after the build render on demand; proxy.ts returns a real 404 for slugs that are
+ * not published, so a "not found" result is never cached for a slug that is about to be published.
+ */
+export async function generateStaticParams() {
+  return (await getProjects()).map((p) => ({ slug: p.slug }));
+}
+
 export async function generateMetadata({ params }: PageProps<"/projects/[slug]">): Promise<Metadata> {
-  // Request-time on purpose: a project published after the build must never get a stale "not found" head.
-  await connection();
   const { slug } = await params;
   const project = await getProject(slug);
   if (!project) return {};
@@ -53,10 +59,8 @@ function Block({
 const paras = (items: string[]) => items.map((t) => <p key={t}>{t}</p>);
 
 /**
- * Case studies are managed in the CMS, so each one is resolved per request (the data itself still comes
- * from the tagged cache). The static shell therefore never contains project-specific content, which avoids
- * caching a "not found" shell for slugs created after the build. proxy.ts returns a real HTTP 404 for
- * unknown slugs before this page renders.
+ * Case studies are managed in the CMS; the data comes from the tagged cache and is invalidated when content is
+ * published or unpublished. Suspense keeps the page shell streaming-friendly.
  */
 export default function ProjectPage({ params }: PageProps<"/projects/[slug]">) {
   return (
@@ -67,7 +71,6 @@ export default function ProjectPage({ params }: PageProps<"/projects/[slug]">) {
 }
 
 async function ProjectBody({ params }: { params: PageProps<"/projects/[slug]">["params"] }) {
-  await connection();
   const { slug } = await params;
   const project = await getProject(slug);
   if (!project) notFound();
