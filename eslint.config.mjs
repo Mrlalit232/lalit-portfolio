@@ -12,9 +12,6 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
-    // Generated output: alternate build folders (NEXT_DIST_DIR, e.g. .next-e2e) and local databases.
-    ".next-*/**",
-    ".data/**",
   ]),
 ]);
 

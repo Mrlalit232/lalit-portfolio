@@ -1,7 +1,6 @@
 import Link from "next/link";
 import type { ComponentProps, ReactNode } from "react";
 import { ArrowUpRight } from "lucide-react";
-import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 
 export function cn(...parts: (string | false | null | undefined)[]) {
   return parts.filter(Boolean).join(" ");
@@ -69,21 +68,14 @@ export function Section({
   className,
   children,
   labelledBy,
-  defer = false,
 }: {
   id?: string;
   className?: string;
   children: ReactNode;
   labelledBy?: string;
-  /**
-   * Skip rendering until near the viewport (`content-visibility: auto`). Use ONLY for sections that start below the
-   * first screen: the browser estimates the height of a skipped section, and one that straddles the viewport would
-   * shift the content below it (layout shift) when its real height replaces the estimate.
-   */
-  defer?: boolean;
 }) {
   return (
-    <section id={id} aria-labelledby={labelledBy} className={cn(defer && "defer-render", "py-16 sm:py-24", className)}>
+    <section id={id} aria-labelledby={labelledBy} className={cn("py-16 sm:py-24", className)}>
       <Container>{children}</Container>
     </section>
   );
@@ -149,15 +141,12 @@ export function PageHero({
   title,
   description,
   accent,
-  crumb,
   children,
 }: {
   eyebrow: string;
   title: ReactNode;
   description: ReactNode;
   accent?: Accent;
-  /** Page name for the breadcrumb trail (Home > crumb). Needs the page path. */
-  crumb?: { name: string; path: string };
   children?: ReactNode;
 }) {
   return (
@@ -165,7 +154,6 @@ export function PageHero({
       <div aria-hidden className="aurora absolute inset-0 -z-10" />
       <div aria-hidden className="grid-bg absolute inset-0 -z-10" />
       <Container>
-        {crumb && <Breadcrumbs trail={[crumb]} />}
         <SectionHeading as="h1" eyebrow={eyebrow} title={title} description={description} accent={accent} />
         {children && <div className="mt-8">{children}</div>}
       </Container>

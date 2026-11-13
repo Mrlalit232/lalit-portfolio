@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { Briefcase, GraduationCap, Award, Users, Trophy } from "lucide-react";
 import type { Credential, Experience, Service, SkillGroup } from "@/data/types";
 import { Badge, ButtonLink, CheckList, Container, accentDot, cn } from "@/components/ui/primitives";
@@ -148,28 +147,6 @@ export function ServiceGrid({ items, preview = false }: { items: Service[]; prev
   );
 }
 
-/* ---------------- Testimonials ---------------- */
-export function TestimonialGrid({ items }: { items: { name: string; designation: string; organization: string; text: string }[] }) {
-  return (
-    <Stagger className="grid gap-5 md:grid-cols-2">
-      {items.map((t) => (
-        <StaggerItem key={`${t.name}-${t.organization}`} className="h-full">
-          <figure className="surface h-full rounded-3xl p-6">
-            <blockquote className="leading-relaxed text-fg">&ldquo;{t.text}&rdquo;</blockquote>
-            <figcaption className="mt-5 text-sm">
-              <span className="font-medium text-fg">{t.name}</span>
-              <span className="text-fg-muted">
-                {" "}
-                · {t.designation}, {t.organization}
-              </span>
-            </figcaption>
-          </figure>
-        </StaggerItem>
-      ))}
-    </Stagger>
-  );
-}
-
 /* ---------------- Contact CTA ---------------- */
 export function ContactCta({
   title = "Let's build something useful.",
@@ -201,26 +178,3 @@ export function ContactCta({
   );
 }
 
-
-/** Contextual internal links between related pages (descriptive anchor text, no repeated targets). */
-export function RelatedLinks({ links }: { links: { href: string; label: string; hint: string }[] }) {
-  return (
-    <section aria-labelledby="related-heading" className="border-t border-line py-12 sm:py-16">
-      <Container>
-        <h2 id="related-heading" className="font-mono text-xs uppercase tracking-[0.18em] text-fg-subtle">
-          Keep exploring
-        </h2>
-        <ul className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {links.map((l) => (
-            <li key={l.href}>
-              <Link href={l.href} className="surface surface-hover block rounded-2xl p-5">
-                <span className="font-medium text-fg">{l.label}</span>
-                <span className="mt-1 block text-sm text-fg-muted">{l.hint}</span>
-              </Link>
-            </li>
-          ))}
-        </ul>
-      </Container>
-    </section>
-  );
-}

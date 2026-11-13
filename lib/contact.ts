@@ -1,5 +1,12 @@
 import { z } from "zod";
 
+export const inquiryTypes = [
+  { value: "employment", label: "Employment inquiry" },
+  { value: "project", label: "Website / project inquiry" },
+  { value: "collaboration", label: "Business collaboration" },
+  { value: "other", label: "Something else" },
+] as const;
+
 export const contactSchema = z.object({
   type: z.enum(["employment", "project", "collaboration", "other"], {
     error: "Please choose an inquiry type.",
@@ -16,6 +23,13 @@ export const contactSchema = z.object({
 
 export type ContactInput = z.infer<typeof contactSchema>;
 
-// Browser-safe constants and types live in contact-shared.ts (no Zod); re-exported here for server code.
-export { inquiryTypes, initialContactState } from "./contact-shared";
-export type { ContactState } from "./contact-shared";
+type FieldValues = Partial<Record<keyof ContactInput, string>>;
+
+export type ContactState =
+  | { status: "idle" }
+  | { status: "success"; message: string }
+  | { status: "error"; message: string; fieldErrors?: FieldValues; values?: FieldValues }
+  /** No email provider configured: nothing was sent. The UI offers a mailto fallback. */
+  | { status: "unconfigured"; message: string; mailto?: string; values?: FieldValues };
+
+export const initialContactState: ContactState = { status: "idle" };

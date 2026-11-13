@@ -1,14 +1,12 @@
 import Link from "next/link";
 import { footerNav } from "@/data/navigation";
 import { site } from "@/lib/site";
-import { getProfile } from "@/lib/content/public";
 import { Container } from "@/components/ui/primitives";
 import { GithubIcon, LinkedinIcon } from "@/components/ui/icons";
 import { Mail } from "lucide-react";
 
-export async function Footer() {
-  const { contact } = await getProfile();
-  const { email, linkedin, github, location } = contact;
+export function Footer() {
+  const { email, linkedin, github } = site.contact;
   const links = [
     email && { label: "Email", href: `mailto:${email}`, Icon: Mail },
     linkedin && { label: "LinkedIn", href: linkedin, Icon: LinkedinIcon },
@@ -25,7 +23,6 @@ export async function Footer() {
               <span className="text-tech">Technology</span> × <span className="text-business">Business</span> ×{" "}
               <span className="text-creative">Creativity</span>
             </p>
-            <p className="mt-3 text-sm text-fg-subtle">{location}</p>
             <p className="mt-4 max-w-sm text-sm leading-relaxed text-fg-subtle">
               Web development, QA and test automation, client and business management, operations and digital marketing.
             </p>
