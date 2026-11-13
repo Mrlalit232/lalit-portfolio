@@ -37,7 +37,7 @@ jobs:
       - name: Install dependencies (lockfile only)
         run: |
           echo "::notice::node $(node -v) npm $(npm -v)"
-          npm ci || { s=$?; for f in ~/.npm/_logs/*.log; do grep -E " error | ERR|verbose stack|code |errno" "$f" | tail -25 | while IFS= read -r l; do echo "::error::${l:0:900}"; done; done; exit $s; }
+          npm ci > /tmp/npmci.log 2>&1 || { s=$?; grep -m 14 -E "npm (error|warn)" /tmp/npmci.log | while IFS= read -r l; do echo "::error::${l:0:600}"; done; exit $s; }
 
       - name: Repository hygiene (no env files, databases or build output tracked)
         run: |
