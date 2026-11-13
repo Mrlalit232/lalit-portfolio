@@ -11,11 +11,13 @@
     "test:seo": "node scripts/seo-audit.mjs",
     "e2e:setup": "node --env-file-if-exists=.env.local --import tsx scripts/e2e-setup.ts",
     "test:e2e": "node tests/e2e/admin.mjs && node tests/e2e/permissions.mjs && node tests/e2e/cms.mjs && node tests/e2e/ventures.mjs && node tests/e2e/public.mjs",
+    "test:smoke": "node tests/e2e/smoke.mjs",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "node --env-file-if-exists=.env.local --import tsx scripts/migrate.ts",
     "setup:local": "node --env-file-if-exists=.env.local --import tsx scripts/setup-local.ts",
     "admin:create": "node --env-file-if-exists=.env.local --import tsx scripts/admin.ts create",
     "admin:reset-password": "node --env-file-if-exists=.env.local --import tsx scripts/admin.ts reset-password",
+    "admin:reset-2fa": "node --env-file-if-exists=.env.local --import tsx scripts/admin.ts reset-2fa",
     "db:seed": "node --env-file-if-exists=.env.local --import tsx scripts/seed.ts"
   },
   "dependencies": {

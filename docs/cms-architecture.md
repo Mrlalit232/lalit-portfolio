@@ -3,13 +3,16 @@
 > **Status: this is the original Milestone 1 planning document, kept for the reasoning behind the design.** The
 > implementation differs in places; where it does, **section 11 and this box win**.
 >
-> **Implemented:** Profile, Projects, Skills, Experience, Education, Certifications, Ventures and Testimonials modules; draft
-> overlay with Publish/Unpublish; Archive, Trash/Restore/Delete forever, Duplicate, Reorder; search; activity log; Owner and
-> Editor roles enforced server-side (tested by replaying captured Server Actions); a single `content_items` table instead of one
-> table per type; public site reads published content through a tagged cache with a static fallback to `data/`.
-> **Not implemented (documented, not hidden):** media library and uploads (images are URLs), revision history, scheduled
-> publishing, preview links, autosave, bulk actions, pages/sections and navigation managers, SEO and site-settings managers,
-> redirects, contact-message inbox, analytics, JSON export, 2FA, user-management UI.
+> **Implemented:** Profile, Projects, Skills, Experience, Education, Certifications, Services, Ventures and Testimonials
+> modules; draft overlay with Publish/Unpublish; Archive, Trash/Restore/Delete forever, Duplicate, Reorder, bulk actions and
+> pagination; revision history with restore; scheduled publishing; expiring preview links (projects, ventures); media library
+> (images and PDFs, stored in Postgres); resume manager; SEO manager (per-page overrides, noindex); redirect manager (with
+> automatic redirects when a published project URL changes); contact-message inbox; privacy-first analytics; TOTP two-factor
+> authentication with recovery codes; change-password; search; activity log; Owner and Editor roles enforced server-side
+> (tested by replaying captured Server Actions); a single `content_items` table instead of one table per type; public site
+> reads published content through a tagged cache with a static fallback to `data/`.
+> **Not implemented (documented, not hidden):** autosave, pages/sections and navigation managers, JSON export, user-management
+> UI, emailed password-reset links, previews for content types other than projects and ventures.
 > **Test tooling now exists:** `npm test` (Vitest), `npm run test:seo`, `npm run test:e2e` (see README). The animation library
 > mentioned below (Motion) has since been removed; reveals and transitions are CSS-only.
 

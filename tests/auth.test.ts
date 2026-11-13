@@ -62,7 +62,7 @@ describe("login flow", () => {
   it("succeeds with valid credentials and stores only a hash of the token", async () => {
     const r = await login("admin@example.com", GOOD_PASSWORD, "198.51.100.10");
     expect(r.ok).toBe(true);
-    if (!r.ok) return;
+    if (!r.ok || r.twoFactor) return;
     const rows = await h.db.select().from(sessions);
     expect(rows.some((s) => s.id === r.token)).toBe(false); // raw token never stored
     expect(rows.some((s) => s.id === hashToken(r.token))).toBe(true);

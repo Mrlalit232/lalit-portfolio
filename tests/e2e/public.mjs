@@ -108,8 +108,9 @@ for (const w of widths) {
   await page.getByRole("button", { name: "Send message" }).click();
   await page.waitForTimeout(1200);
   const txt = await page.locator("form").first().innerText().catch(() => "");
-  const success = await page.getByText("Message sent").count();
-  log(success === 0 && /not configured/i.test(txt), "no provider => honest 'not configured' state, no fake success");
+  // With a database the message is SAVED to the admin inbox, so an honest success is "received and saved".
+  // It must never claim the message was emailed when no email provider is configured.
+  log(/Message received/.test(txt) && /received and saved/i.test(txt) && !/has been sent/i.test(txt), "no email provider + database => honest 'received and saved' (not 'sent')");
   await ctx.close();
 }
 

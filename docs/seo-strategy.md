@@ -43,6 +43,14 @@ the realistic early wins are branded queries and specific project/technology lon
   contrast-compliant. Off-screen sections use `content-visibility: auto`. Fonts via `next/font` (self-hosted).
 - **Automated checks**: `npm run test:seo` (see README) audits all of the above against a running build.
 
+## Managing SEO from the admin
+
+Admin, SEO lets the owner override, per public page, the title, meta description, social sharing image (an uploaded file)
+and `noindex`, plus a fallback description and default social image. Overrides flow through `pageMetadata()` into
+`generateMetadata`, so they appear in the real `<head>` and in Open Graph and Twitter tags; a page marked `noindex` also
+disappears from `sitemap.xml`. Case studies use their own title and summary (edited with the project). Admin, Redirects
+manages 301/302/307/308 redirects and creates one automatically when a published project's URL changes.
+
 ## Case-study metadata (resolved)
 
 Case studies used to resolve metadata per request, which made Next.js stream `<title>` and `<meta>` into the page

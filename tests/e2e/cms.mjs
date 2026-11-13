@@ -37,11 +37,11 @@ const dash = await page.locator("#admin-main").innerText();
 const card = (label) => { const m = dash.match(new RegExp(label + "\\s+(\\d+)")); return m ? Number(m[1]) : null; };
 log(card("Projects") === 3, `dashboard Projects = ${card("Projects")} (expected 3 seeded)`);
 log(card("Skills") === 30, `dashboard Skills = ${card("Skills")} (expected 30)`);
-log(card("Experience") === 1 && card("Education") === 1 && card("Certifications") === 6 && card("Ventures") === 3, "dashboard Experience/Education/Certifications/Ventures counts match seed");
+log(card("Experience") === 1 && card("Education") === 1 && card("Certifications") === 6 && card("Ventures") === 3 && card("Services") === 7, "dashboard Experience/Education/Certifications/Ventures/Services counts match seed");
 log(card("Testimonials") === 0 && /None published/.test(dash), "dashboard Testimonials = 0 and notes none published");
 log(/Recent activity/.test(dash) && /Imported existing content|Signed in/.test(dash), "dashboard shows real recent activity");
 log(/Database/.test(dash) && /responded in \d+ ms/.test(dash), "dashboard shows live database health");
-log(/File storage/.test(dash) && /Not configured/.test(dash), "dashboard honestly reports file storage not configured");
+log(/File storage/.test(dash) && /Media library stores 0 file/.test(dash), "dashboard reports the media library (0 files on a fresh database)");
 
 // ---------- public site parity with seeded DB ----------
 {
