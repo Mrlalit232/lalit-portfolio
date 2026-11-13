@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useId, useRef, useState } from "react";
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, m } from "motion/react";
 import { Menu, X } from "lucide-react";
 import { primaryNav, resumeNav } from "@/data/navigation";
 import { cn } from "@/components/ui/primitives";
@@ -100,7 +100,7 @@ export function Header() {
                 )}
               >
                 {active && (
-                  <motion.span
+                  <m.span
                     layoutId="nav-active"
                     aria-hidden
                     className="absolute inset-0 -z-10 rounded-full border border-line-strong bg-white/[0.06]"
@@ -136,7 +136,7 @@ export function Header() {
 
       <AnimatePresence>
         {open && (
-          <motion.div
+          <m.div
             id={menuId}
             ref={panelRef}
             initial={{ opacity: 0, y: -8 }}
@@ -164,7 +164,7 @@ export function Header() {
                 );
               })}
             </nav>
-          </motion.div>
+          </m.div>
         )}
       </AnimatePresence>
     </header>

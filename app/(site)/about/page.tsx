@@ -1,12 +1,13 @@
 import { GraduationCap } from "lucide-react";
-import { buildMetadata } from "@/lib/seo";
+import { buildMetadata, profilePageJsonLd } from "@/lib/seo";
+import { JsonLd } from "@/components/ui/JsonLd";
 import { getProfile } from "@/lib/content/public";
 import { Badge, PageHero, Section, SectionHeading } from "@/components/ui/primitives";
 import { Reveal } from "@/components/ui/motion";
-import { ContactCta } from "@/components/sections/shared";
+import { ContactCta, RelatedLinks } from "@/components/sections/shared";
 
 export const metadata = buildMetadata({
-  title: "About",
+  title: "About: BCA Student, Web & QA",
   description:
     "About Lalit Kumar Saini: a BCA student focused on web development, software testing, automation, client communication and business operations.",
   path: "/about",
@@ -16,7 +17,9 @@ export default async function AboutPage() {
   const profile = await getProfile();
   return (
     <>
+      <JsonLd data={profilePageJsonLd("/about", "About Lalit Kumar Saini")} />
       <PageHero
+        crumb={{ name: "About", path: "/about" }}
         eyebrow="About"
         title={
           <>
@@ -100,6 +103,7 @@ export default async function AboutPage() {
         </div>
       </Section>
 
+      <RelatedLinks links={[{ href: "/skills", label: "Skills", hint: "QA and software testing, web development and business skills." },{ href: "/projects", label: "Projects", hint: "Case studies: GenIQ, BHIM Coaching Center and this portfolio." },{ href: "/experience", label: "Experience", hint: "Sales, marketing and operations experience at Red Hills Group." }]} />
       <ContactCta />
     </>
   );

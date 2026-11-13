@@ -2,7 +2,7 @@ import { buildMetadata } from "@/lib/seo";
 import { serviceProcess, services } from "@/data/services";
 import { ButtonLink, PageHero, Section, SectionHeading } from "@/components/ui/primitives";
 import { Reveal, Stagger, StaggerItem } from "@/components/ui/motion";
-import { ContactCta, ServiceGrid } from "@/components/sections/shared";
+import { ContactCta, ServiceGrid, RelatedLinks } from "@/components/sections/shared";
 
 export const metadata = buildMetadata({
   title: "Services",
@@ -15,6 +15,7 @@ export default function ServicesPage() {
   return (
     <>
       <PageHero
+        crumb={{ name: "Services", path: "/services" }}
         eyebrow="Services"
         accent="business"
         title={
@@ -58,6 +59,7 @@ export default function ServicesPage() {
         </p>
       </Section>
 
+      <RelatedLinks links={[{ href: "/projects", label: "Projects", hint: "Examples of websites and web apps I have built." },{ href: "/skills", label: "Skills", hint: "The technologies and practices behind the work." },{ href: "/ventures", label: "Ventures", hint: "The website development business and related ideas." }]} />
       <ContactCta
         title="Tell me about your project."
         body="Share what you need and I will reply with questions or next steps."

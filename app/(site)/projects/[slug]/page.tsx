@@ -4,10 +4,11 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
 import type { Metadata } from "next";
-import { ArrowLeft, ArrowRight, ImageOff } from "lucide-react";
+import { ArrowRight, ImageOff } from "lucide-react";
 import { getProject, getProjects } from "@/lib/content/public";
-import { buildMetadata } from "@/lib/seo";
-import { absoluteUrl, site } from "@/lib/site";
+import { buildMetadata, projectJsonLd } from "@/lib/seo";
+import { JsonLd } from "@/components/ui/JsonLd";
+import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { Badge, ButtonLink, CheckList, Container, Section } from "@/components/ui/primitives";
 import { Reveal } from "@/components/ui/motion";
 import { ContactCta } from "@/components/sections/shared";
@@ -79,28 +80,19 @@ async function ProjectBody({ params }: { params: PageProps<"/projects/[slug]">["
   const index = projects.findIndex((p) => p.slug === project.slug);
   const next = projects[(index + 1) % projects.length];
 
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "CreativeWork",
-    name: project.title,
-    description: project.summary,
-    author: { "@type": "Person", name: site.name },
-    url: absoluteUrl(`/projects/${project.slug}`),
-  };
-
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }}
-      />
+      <JsonLd data={projectJsonLd(project)} />
       <header className="relative isolate overflow-hidden border-b border-line pb-14 pt-32 sm:pb-20 sm:pt-40">
         <div aria-hidden className="aurora absolute inset-0 -z-10" />
         <div aria-hidden className="grid-bg absolute inset-0 -z-10" />
         <Container>
-          <Link href="/projects" className="inline-flex items-center gap-2 text-sm text-fg-muted transition-colors hover:text-fg">
-            <ArrowLeft aria-hidden className="h-4 w-4" /> All projects
-          </Link>
+          <Breadcrumbs
+            trail={[
+              { name: "Projects", path: "/projects" },
+              { name: project.title, path: `/projects/${project.slug}` },
+            ]}
+          />
           <div className="mt-6 flex flex-wrap items-center gap-2">
             <Badge accent="creative">{project.category}</Badge>
             <Badge>{project.status}</Badge>

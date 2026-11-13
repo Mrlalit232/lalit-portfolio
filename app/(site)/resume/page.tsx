@@ -1,4 +1,5 @@
 import { Download } from "lucide-react";
+import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { buildMetadata } from "@/lib/seo";
 import { site } from "@/lib/site";
 import { resumePdfAvailable } from "@/lib/resume";
@@ -36,6 +37,7 @@ export default async function ResumePage() {
       <header className="no-print relative isolate overflow-hidden border-b border-line pb-12 pt-32 sm:pt-40">
         <div aria-hidden className="aurora absolute inset-0 -z-10" />
         <Container>
+          <Breadcrumbs trail={[{ name: "Resume", path: "/resume" }]} />
           <p className="font-mono text-xs uppercase tracking-[0.18em] text-tech">Resume</p>
           <h1 className="mt-4 font-display text-5xl tracking-tight text-fg sm:text-6xl">Resume</h1>
           <p className="mt-4 max-w-xl text-fg-muted">

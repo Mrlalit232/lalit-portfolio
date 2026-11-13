@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { ComponentProps, ReactNode } from "react";
 import { ArrowUpRight } from "lucide-react";
+import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 
 export function cn(...parts: (string | false | null | undefined)[]) {
   return parts.filter(Boolean).join(" ");
@@ -141,12 +142,15 @@ export function PageHero({
   title,
   description,
   accent,
+  crumb,
   children,
 }: {
   eyebrow: string;
   title: ReactNode;
   description: ReactNode;
   accent?: Accent;
+  /** Page name for the breadcrumb trail (Home > crumb). Needs the page path. */
+  crumb?: { name: string; path: string };
   children?: ReactNode;
 }) {
   return (
@@ -154,6 +158,7 @@ export function PageHero({
       <div aria-hidden className="aurora absolute inset-0 -z-10" />
       <div aria-hidden className="grid-bg absolute inset-0 -z-10" />
       <Container>
+        {crumb && <Breadcrumbs trail={[crumb]} />}
         <SectionHeading as="h1" eyebrow={eyebrow} title={title} description={description} accent={accent} />
         {children && <div className="mt-8">{children}</div>}
       </Container>

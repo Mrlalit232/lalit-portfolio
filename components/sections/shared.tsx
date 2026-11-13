@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Briefcase, GraduationCap, Award, Users, Trophy } from "lucide-react";
 import type { Credential, Experience, Service, SkillGroup } from "@/data/types";
 import { Badge, ButtonLink, CheckList, Container, accentDot, cn } from "@/components/ui/primitives";
@@ -200,3 +201,26 @@ export function ContactCta({
   );
 }
 
+
+/** Contextual internal links between related pages (descriptive anchor text, no repeated targets). */
+export function RelatedLinks({ links }: { links: { href: string; label: string; hint: string }[] }) {
+  return (
+    <section aria-labelledby="related-heading" className="border-t border-line py-12 sm:py-16">
+      <Container>
+        <h2 id="related-heading" className="font-mono text-xs uppercase tracking-[0.18em] text-fg-subtle">
+          Keep exploring
+        </h2>
+        <ul className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {links.map((l) => (
+            <li key={l.href}>
+              <Link href={l.href} className="surface surface-hover block rounded-2xl p-5">
+                <span className="font-medium text-fg">{l.label}</span>
+                <span className="mt-1 block text-sm text-fg-muted">{l.hint}</span>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </Container>
+    </section>
+  );
+}

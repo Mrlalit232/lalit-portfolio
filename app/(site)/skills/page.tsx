@@ -3,10 +3,10 @@ import { proficiencyNote } from "@/data/skills";
 import { getCredentials, getSkillGroups } from "@/lib/content/public";
 import { PageHero, Section, SectionHeading } from "@/components/ui/primitives";
 import { Reveal } from "@/components/ui/motion";
-import { ContactCta, CredentialGrid, SkillGroups } from "@/components/sections/shared";
+import { ContactCta, CredentialGrid, SkillGroups, RelatedLinks } from "@/components/sections/shared";
 
 export const metadata = buildMetadata({
-  title: "Skills & Expertise",
+  title: "Skills: QA Testing, Python & Web Dev",
   description:
     "Skills of Lalit Kumar Saini across web development, QA and test automation, business operations, and digital productivity, plus certifications.",
   path: "/skills",
@@ -24,6 +24,7 @@ export default async function SkillsPage() {
   return (
     <>
       <PageHero
+        crumb={{ name: "Skills", path: "/skills" }}
         eyebrow="Skills & expertise"
         title={
           <>
@@ -64,6 +65,7 @@ export default async function SkillsPage() {
         </div>
       </Section>
 
+      <RelatedLinks links={[{ href: "/projects", label: "Projects", hint: "See web development skills applied in real project case studies." },{ href: "/experience", label: "Experience", hint: "Where client handling and operations skills were applied at work." },{ href: "/services", label: "Services", hint: "Website development and digital marketing support." }]} />
       <ContactCta />
     </>
   );

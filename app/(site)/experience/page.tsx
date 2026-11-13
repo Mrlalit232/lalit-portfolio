@@ -3,7 +3,7 @@ import { activities } from "@/data/experience";
 import { getExperience } from "@/lib/content/public";
 import { PageHero, Section, SectionHeading } from "@/components/ui/primitives";
 import { Reveal } from "@/components/ui/motion";
-import { ContactCta, ExperienceCard } from "@/components/sections/shared";
+import { ContactCta, ExperienceCard, RelatedLinks } from "@/components/sections/shared";
 
 export const metadata = buildMetadata({
   title: "Experience",
@@ -17,6 +17,7 @@ export default async function ExperiencePage() {
   return (
     <>
       <PageHero
+        crumb={{ name: "Experience", path: "/experience" }}
         eyebrow="Experience"
         accent="business"
         title={
@@ -64,6 +65,7 @@ export default async function ExperiencePage() {
         </Reveal>
       </Section>
 
+      <RelatedLinks links={[{ href: "/skills", label: "Skills", hint: "The testing, web and business skills behind this experience." },{ href: "/projects", label: "Projects", hint: "Project work built alongside this experience." },{ href: "/resume", label: "Resume", hint: "A one-page summary you can download or print." }]} />
       <ContactCta />
     </>
   );

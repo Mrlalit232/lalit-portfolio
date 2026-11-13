@@ -2,7 +2,7 @@ import { buildMetadata } from "@/lib/seo";
 import { getVentures } from "@/lib/content/public";
 import { PageHero, Section, SectionHeading } from "@/components/ui/primitives";
 import { Reveal } from "@/components/ui/motion";
-import { ContactCta } from "@/components/sections/shared";
+import { ContactCta, RelatedLinks } from "@/components/sections/shared";
 import { VentureDetail } from "@/components/sections/VentureCard";
 
 export const metadata = buildMetadata({
@@ -20,6 +20,7 @@ export default async function VenturesPage() {
   return (
     <>
       <PageHero
+        crumb={{ name: "Ventures", path: "/ventures" }}
         eyebrow="Entrepreneurship & Ventures"
         accent="business"
         title={
@@ -76,6 +77,7 @@ export default async function VenturesPage() {
         </Reveal>
       </Section>
 
+      <RelatedLinks links={[{ href: "/services", label: "Services", hint: "Website development services available today." },{ href: "/projects", label: "Projects", hint: "Project work that supports these initiatives." },{ href: "/about", label: "About", hint: "Background and direction." }]} />
       <ContactCta
         title="Interested in collaborating?"
         body="If you are a business owner, potential partner or service provider and want to talk, I would like to hear from you."

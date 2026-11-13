@@ -1,12 +1,13 @@
 import type { MetadataRoute } from "next";
 import { primaryNav, resumeNav } from "@/data/navigation";
 import { getProjects } from "@/lib/content/public";
-import { absoluteUrl } from "@/lib/site";
+import { absoluteUrl, site } from "@/lib/site";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const projects = await getProjects();
   const pages = [...primaryNav, resumeNav].map((p) => ({
-    url: absoluteUrl(p.href),
+    // Home is the bare origin so it matches the canonical URL exactly (no trailing slash).
+    url: p.href === "/" ? site.url : absoluteUrl(p.href),
     changeFrequency: "monthly" as const,
     priority: p.href === "/" ? 1 : 0.7,
   }));

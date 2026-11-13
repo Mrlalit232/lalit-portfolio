@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowRight, Cpu, Download, Handshake, Sparkles } from "lucide-react";
-import { buildMetadata } from "@/lib/seo";
+import { buildMetadata, profilePageJsonLd } from "@/lib/seo";
+import { JsonLd } from "@/components/ui/JsonLd";
 import { site } from "@/lib/site";
 import { resumePdfAvailable } from "@/lib/resume";
 import { services } from "@/data/services";
@@ -19,7 +20,7 @@ import {
 } from "@/components/sections/shared";
 
 export const metadata = buildMetadata({
-  title: "Lalit Kumar Saini — Technology × Business × Creativity",
+  title: "Lalit Kumar Saini | Portfolio: Web Development & QA Testing",
   absoluteTitle: true,
   description:
     "Lalit Kumar Saini: BCA student with web development projects, a QA and test automation focus, and hands-on client, sales and operations experience.",
@@ -64,6 +65,7 @@ export default async function HomePage() {
   const featuredProjects = projects.filter((p) => p.featured);
   return (
     <>
+      <JsonLd data={profilePageJsonLd("/", "Lalit Kumar Saini Portfolio")} />
       {/* Hero */}
       <section className="relative isolate overflow-hidden pb-20 pt-32 sm:pb-28 sm:pt-44">
         <div aria-hidden className="aurora absolute inset-0 -z-10" />
@@ -103,7 +105,7 @@ export default async function HomePage() {
               </div>
             </div>
 
-            <Reveal delay={0.15}>
+            <Reveal eager delay={0.15}>
               <ul className="space-y-3" aria-label="Three strengths">
                 {pillars.map((p) => (
                   <li

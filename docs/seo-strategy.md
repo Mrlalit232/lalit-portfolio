@@ -1,0 +1,67 @@
+# SEO strategy and technical notes
+
+Goal: be found for **Lalit Kumar Saini** first, and credibly for the professional areas he genuinely works in.
+Nothing here promises rankings or rich results, and no search volume or difficulty figures are quoted: none were
+measured. Validate with Google Search Console (impressions and queries) after launch.
+
+## Keyword map (one primary target per page, no stuffing)
+
+| Page | Primary keyword | Secondary / long-tail | Intent |
+|---|---|---|---|
+| `/` | Lalit Kumar Saini (portfolio) | Lalit Kumar Saini developer, web developer and QA portfolio | Branded / navigational |
+| `/about` | Lalit Kumar Saini BCA student | Lalit Saini Gurugram, web and QA background | Branded / informational |
+| `/skills` | Software testing portfolio | QA tester portfolio, Python automation (learning), manual testing, test case design, web developer skills | Professional opportunity |
+| `/projects` | Web development projects | software testing projects, Next.js portfolio projects | Professional opportunity |
+| `/projects/[slug]` | The project name (e.g. GenIQ) | Technology-specific long-tail from the real stack | Informational / hiring |
+| `/experience` | Sales marketing operations experience | Red Hills Group, campus ambassador | Professional opportunity |
+| `/services` | Website development services | business websites, landing pages, portfolio websites | Commercial (client) |
+| `/ventures` | Entrepreneurship ventures | website development business | Informational |
+| `/contact`, `/resume` | Contact Lalit Kumar Saini | hire web developer / QA tester, resume download | Transactional |
+
+Honesty rules: Python and test automation are labelled "Learning & practising" on the site, so they are targeted as
+*learning/practising* topics, not as senior expertise. Generic terms ("QA automation portfolio") are very competitive;
+the realistic early wins are branded queries and specific project/technology long-tail queries.
+
+## What is implemented
+
+- **Metadata** per page via `buildMetadata()` in `lib/seo.ts`: unique title and description (descriptions are clipped
+  to 160 characters at a word boundary), canonical URL, Open Graph (including `og:image`), Twitter card, `noindex` only
+  where asked. Project pages generate metadata from the published case study.
+- **Sitemap** (`app/sitemap.ts`): public pages and published case studies only; configurable origin; no admin, API or
+  preview URLs. `lastmod` is intentionally omitted because the content layer does not expose a verified modified date.
+- **robots.txt** (`app/robots.ts`): allows public content, disallows `/admin`, `/preview`, `/api`, references the sitemap.
+  This is not a security control; the admin is protected by authentication and `noindex` headers.
+- **Structured data** (JSON-LD, verified facts only): `Person` (with `sameAs` for GitHub and LinkedIn, stable `@id`),
+  `WebSite`, `ProfilePage` (home, about), `BreadcrumbList` (every inner page), and per project `SoftwareSourceCode`
+  (when a GitHub repository link exists) or `CreativeWork`. No reviews, ratings or organisation are claimed.
+- **Breadcrumbs** (visible and structured) and a "Keep exploring" block with descriptive internal links on the main pages.
+- **Canonical consistency**: one origin from `NEXT_PUBLIC_SITE_URL`, no trailing slash, no query strings in the sitemap.
+  Real HTTP 404 for unknown URLs, including unknown project slugs.
+- **Core Web Vitals work**: page content no longer waits for JavaScript to become visible (the route transition and
+  hero entrance are CSS-only); Motion's feature set is lazy-loaded; fonts via `next/font` (self-hosted).
+- **Automated checks**: `npm run test:seo` (see README) audits all of the above against a running build.
+
+## Known trade-off: project page metadata
+
+Project pages resolve metadata per request so a newly published project never serves a stale "not found" head.
+Next.js therefore streams their `<title>`/`<meta>` into the page body for ordinary browsers, and sends them in `<head>`
+for crawlers in Next's built-in list (Bing, DuckDuckGo, Apple, Yandex, Baidu, Twitter/X, LinkedIn, Facebook, Slack,
+Discord, WhatsApp and Google's inspection/renderer bots). Googlebot is not in that list because Google renders
+JavaScript and reads streamed metadata. Lighthouse (which is not in the list) therefore scores a case-study page 91
+on SEO with "no meta description" even though crawlers receive it. Forcing head metadata for every client
+(`htmlLimitedBots: /.*/`) was tried and **breaks link prefetching**, so it is not used. Check a case study with
+Search Console's URL Inspection after launch.
+
+## Search Console and Bing readiness (not done; needs your accounts and a live domain)
+
+1. Deploy, set `NEXT_PUBLIC_SITE_URL` to the final domain, redeploy.
+2. Google Search Console: add the domain property, verify via DNS TXT (or the HTML-tag method), then Sitemaps ->
+   submit `https://<domain>/sitemap.xml`. Use URL Inspection on `/`, `/projects` and one case study.
+3. Bing Webmaster Tools: import the site from Search Console, or verify separately, and submit the same sitemap.
+4. Optional analytics: none is installed (privacy and cost); add one only when wanted.
+5. Run `EXPECT_ORIGIN=https://<domain> BASE_URL=https://<domain> npm run test:seo` against production.
+
+## Future (not built, to avoid thin or filler content)
+
+A short technical blog or per-project write-ups (what was tested, how, what was learned) would build genuine topical
+authority for QA and automation. Add only when there is real material to publish.

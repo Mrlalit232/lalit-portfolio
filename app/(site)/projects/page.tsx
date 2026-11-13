@@ -3,10 +3,10 @@ import { getProjects } from "@/lib/content/public";
 import { PageHero } from "@/components/ui/primitives";
 import { Container } from "@/components/ui/primitives";
 import { ProjectExplorer } from "@/components/projects/ProjectExplorer";
-import { ContactCta } from "@/components/sections/shared";
+import { ContactCta, RelatedLinks } from "@/components/sections/shared";
 
 export const metadata = buildMetadata({
-  title: "Projects",
+  title: "Projects: Web Development & Testing",
   description:
     "Projects by Lalit Kumar Saini: GenIQ, a local-first AI document workbench; the BHIM Coaching Center platform; and this Next.js portfolio.",
   path: "/projects",
@@ -18,6 +18,7 @@ export default async function ProjectsPage() {
   return (
     <>
       <PageHero
+        crumb={{ name: "Projects", path: "/projects" }}
         eyebrow="Projects"
         title={
           <>
@@ -29,6 +30,7 @@ export default async function ProjectsPage() {
       <Container className="py-16 sm:py-24">
         <ProjectExplorer projects={projects} categories={projectCategories} />
       </Container>
+      <RelatedLinks links={[{ href: "/skills", label: "Skills and technologies", hint: "The skills and tools used across these projects." },{ href: "/ventures", label: "Ventures", hint: "Entrepreneurial initiatives and their honest status." },{ href: "/services", label: "Services", hint: "Hire me to build a website for your business." }]} />
       <ContactCta title="Have a project in mind?" body="I am open to employment opportunities and website projects." />
     </>
   );
