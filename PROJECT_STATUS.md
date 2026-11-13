@@ -28,6 +28,7 @@ Public portfolio plus an admin CMS: content (Profile, Projects, Skills, Experien
 | Old email in Git history | Investigated (below). History not rewritten. |
 
 ## Verified (this branch, clean build, fresh throwaway database, Windows 11, Node 24, Chrome)
+- **GitHub Actions** (real runner: Ubuntu, Node 24.22, npm 11.19) ran the whole workflow successfully on the branch push: quality job (hygiene, ESLint, typecheck, 90 unit tests, production audit, build with no database or secrets) and browser job (SEO audit and all nine suites). Run: https://github.com/Mrlalit232/lalit-portfolio/actions/runs/43499269379. The first runs failed at `npm ci` (lockfile lacked optional `@emnapi/runtime` entries written on Windows); fixed by completing the lockfile (no version changes).
 - Browser suites via `npm run test:browser`: SEO audit **200/200** · smoke 37/37 · admin 18/18 · permissions 19/19 · CMS 87/87 · Ventures 29/29 · public site at nine widths **497/497** · accessibility (axe-core, WCAG 2.2 AA) 55/55 · security 63/63 (4 new CSP checks) · features 38/38.
 - ESLint clean · `npm run typecheck` clean · **90 unit/integration tests** passing (7 new: CSP builder, `AUTH_SECRET` rotation) · production build succeeds with no database and no secrets · `npm audit --omit=dev`: 0 vulnerabilities.
 - Unit-test flake: on one first run right after heavy machine load, 2 test files reported errors (8 of 10 files passed); 5 consecutive reruns were 90/90. Not reproduced and not diagnosed (each file starts its own in-memory Postgres/WASM). If CI shows it, treat it as a real issue.
@@ -62,7 +63,7 @@ The first site commit on `main` (`1009fb6`) contains an older default contact ad
 - Profile text in `data/profile.ts` only applies to new installs and the fallback; existing database content is edited in Admin, Profile.
 
 ## NOT verified (needs your accounts or a real deployment)
-Neon over the WebSocket driver and `db:migrate` against Neon; Vercel build/runtime behaviour (including the proxy's self-requests and Deployment Protection); Resend email delivery; DNS/TLS; Search Console and Bing; real-device INP; the GitHub Actions workflow on GitHub itself until its first run on the pull request (see the PR for the result).
+Neon over the WebSocket driver and `db:migrate` against Neon; Vercel build/runtime behaviour (including the proxy's self-requests and Deployment Protection); Resend email delivery; DNS/TLS; Search Console and Bing; real-device INP.
 
 ## Owner actions (one checklist)
 1. Review and merge the pull request when satisfied (it was not merged for you).
