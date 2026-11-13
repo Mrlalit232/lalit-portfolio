@@ -1,17 +1,21 @@
-import { buildMetadata } from "@/lib/seo";
-import { serviceProcess, services } from "@/data/services";
+import { pageMetadata } from "@/lib/content/page-seo";
+import { serviceProcess } from "@/data/services";
+import { getServices } from "@/lib/content/public";
 import { ButtonLink, PageHero, Section, SectionHeading } from "@/components/ui/primitives";
 import { Reveal, Stagger, StaggerItem } from "@/components/ui/motion";
 import { ContactCta, ServiceGrid, RelatedLinks } from "@/components/sections/shared";
 
-export const metadata = buildMetadata({
+export async function generateMetadata() {
+  return pageMetadata({
   title: "Services",
   description:
     "Website development, business websites, portfolio sites, landing pages, maintenance and digital marketing support from Lalit Kumar Saini.",
   path: "/services",
-});
+  });
+}
 
-export default function ServicesPage() {
+export default async function ServicesPage() {
+  const services = await getServices();
   return (
     <>
       <PageHero

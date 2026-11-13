@@ -2,6 +2,8 @@ import { Suspense } from "react";
 import { requireAdmin } from "@/lib/auth/guard";
 import { AdminShell } from "@/components/admin/Shell";
 import { AdminUiProvider } from "@/components/admin/provider";
+import { getDb } from "@/lib/db";
+import { unreadCount } from "@/lib/messages";
 
 /**
  * Every page in this group sits behind a real server-side session check.
@@ -9,9 +11,11 @@ import { AdminUiProvider } from "@/components/admin/provider";
  */
 async function Gate({ children }: { children: React.ReactNode }) {
   const user = await requireAdmin();
+  // A failed count must never block the admin.
+  const unread = await getDb().then(unreadCount).catch(() => 0);
   return (
     <AdminUiProvider>
-      <AdminShell user={{ email: user.email, role: user.role }}>{children}</AdminShell>
+      <AdminShell user={{ email: user.email, role: user.role }} unread={unread}>{children}</AdminShell>
     </AdminUiProvider>
   );
 }

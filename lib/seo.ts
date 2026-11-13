@@ -9,6 +9,8 @@ type PageSeo = {
   noindex?: boolean;
   /** Use the title exactly as given, without the "| Name" suffix (home page). */
   absoluteTitle?: boolean;
+  /** Social sharing image (path or absolute URL). Defaults to the generated brand card. */
+  image?: string;
 };
 
 /** Meta descriptions over ~160 characters are truncated by search engines; clip at a word boundary. */
@@ -22,7 +24,7 @@ export function clipDescription(text: string, max = 160) {
 const ogImage = { url: absoluteUrl("/opengraph-image"), width: 1200, height: 630, alt: `${site.name}: ${site.brand}` };
 
 /** Builds consistent page metadata: title, description, canonical and Open Graph. */
-export function buildMetadata({ title, description: rawDescription, path, noindex, absoluteTitle }: PageSeo): Metadata {
+export function buildMetadata({ title, description: rawDescription, path, noindex, absoluteTitle, image }: PageSeo): Metadata {
   const description = clipDescription(rawDescription);
   const full = absoluteTitle ? title : `${title} | ${site.name}`;
   const url = absoluteUrl(path);
@@ -37,13 +39,13 @@ export function buildMetadata({ title, description: rawDescription, path, noinde
       title: full,
       description,
       url,
-      images: [ogImage],
+      images: [image ? { url: image.startsWith("/") ? absoluteUrl(image) : image, alt: `${site.name}: ${site.brand}` } : ogImage],
     },
     twitter: {
       card: "summary_large_image",
       title: full,
       description,
-      images: [ogImage.url],
+      images: [image ? (image.startsWith("/") ? absoluteUrl(image) : image) : ogImage.url],
     },
   };
 }

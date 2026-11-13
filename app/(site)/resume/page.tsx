@@ -1,18 +1,19 @@
 import { Download } from "lucide-react";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
-import { buildMetadata } from "@/lib/seo";
+import { pageMetadata } from "@/lib/content/page-seo";
 import { site } from "@/lib/site";
-import { resumePdfAvailable } from "@/lib/resume";
-import { getCredentials, getExperience, getProfile, getProjects, getSkillGroups } from "@/lib/content/public";
+import { getCredentials, getExperience, getProfile, getProjects, getResumeHref, getSkillGroups } from "@/lib/content/public";
 import { ButtonLink, Container } from "@/components/ui/primitives";
 import { PrintButton } from "@/components/sections/PrintButton";
 
-export const metadata = buildMetadata({
+export async function generateMetadata() {
+  return pageMetadata({
   title: "Resume",
   description:
     "Resume of Lalit Kumar Saini: education, experience, projects, skills and certifications. Download as PDF or print.",
   path: "/resume",
-});
+  });
+}
 
 function RSection({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -28,7 +29,7 @@ function RSection({ title, children }: { title: string; children: React.ReactNod
 export default async function ResumePage() {
   const [profile, experience, projects, skillGroups, credentials] = await Promise.all([getProfile(), getExperience(), getProjects(), getSkillGroups(), getCredentials()]);
   // Checked at build time: the download button only appears when the real file exists.
-  const pdfAvailable = resumePdfAvailable();
+  const resumeHref = await getResumeHref();
   const { email, linkedin, github, location } = profile.contact;
   const contactItems = [email, location, linkedin, github].filter(Boolean) as string[];
 
@@ -44,8 +45,8 @@ export default async function ResumePage() {
             A text-based, ATS-friendly resume. Use your browser&apos;s print dialog to save a PDF copy of this page.
           </p>
           <div className="mt-8 flex flex-wrap items-center gap-3">
-            {pdfAvailable ? (
-              <ButtonLink href={site.resumePdf} download>
+            {resumeHref ? (
+              <ButtonLink href={resumeHref} download>
                 <Download aria-hidden className="h-4 w-4" />
                 Download PDF
               </ButtonLink>

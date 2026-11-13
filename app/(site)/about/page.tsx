@@ -1,17 +1,20 @@
 import { GraduationCap } from "lucide-react";
-import { buildMetadata, profilePageJsonLd } from "@/lib/seo";
+import { profilePageJsonLd } from "@/lib/seo";
+import { pageMetadata } from "@/lib/content/page-seo";
 import { JsonLd } from "@/components/ui/JsonLd";
 import { getProfile } from "@/lib/content/public";
 import { Badge, PageHero, Section, SectionHeading } from "@/components/ui/primitives";
 import { Reveal } from "@/components/ui/motion";
 import { ContactCta, RelatedLinks } from "@/components/sections/shared";
 
-export const metadata = buildMetadata({
+export async function generateMetadata() {
+  return pageMetadata({
   title: "About: BCA Student, Web & QA",
   description:
     "About Lalit Kumar Saini: a BCA student focused on web development, software testing, automation, client communication and business operations.",
   path: "/about",
-});
+  });
+}
 
 export default async function AboutPage() {
   const profile = await getProfile();

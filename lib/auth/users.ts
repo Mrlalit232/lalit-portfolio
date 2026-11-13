@@ -29,6 +29,20 @@ export async function createAdminUser(db: Db, input: { email: string; password: 
   return user;
 }
 
+/** Changes the password of a signed-in user (current password required) and revokes all OTHER sessions. */
+export async function changeOwnPassword(db: Db, userId: string, currentPassword: string, newPassword: string, keepSessionId?: string) {
+  const [user] = await db.select().from(users).where(eq(users.id, userId)).limit(1);
+  if (!user) return { ok: false as const, error: "User not found." };
+  if (!(await verifyPassword(user.passwordHash, currentPassword))) return { ok: false as const, error: "Your current password is incorrect." };
+  const weak = checkPasswordStrength(newPassword, user.email);
+  if (weak) return { ok: false as const, error: weak };
+  if (newPassword === currentPassword) return { ok: false as const, error: "Choose a password different from the current one." };
+  await db.update(users).set({ passwordHash: await hashPassword(newPassword) }).where(eq(users.id, userId));
+  await revokeAllSessions(db, userId, keepSessionId);
+  await logActivity(db, { actorId: userId, action: "user.password", entityType: "user", entityId: userId, summary: "Password changed; other sessions revoked" });
+  return { ok: true as const };
+}
+
 /** Sets a new password and revokes every existing session for that user. */
 export async function setUserPassword(db: Db, userId: string, newPassword: string) {
   const [user] = await db.select().from(users).where(eq(users.id, userId)).limit(1);

@@ -1,16 +1,18 @@
-import { buildMetadata } from "@/lib/seo";
+import { pageMetadata } from "@/lib/content/page-seo";
 import { proficiencyNote } from "@/data/skills";
 import { getCredentials, getSkillGroups } from "@/lib/content/public";
 import { PageHero, Section, SectionHeading } from "@/components/ui/primitives";
 import { Reveal } from "@/components/ui/motion";
 import { ContactCta, CredentialGrid, SkillGroups, RelatedLinks } from "@/components/sections/shared";
 
-export const metadata = buildMetadata({
+export async function generateMetadata() {
+  return pageMetadata({
   title: "Skills: QA Testing, Python & Web Dev",
   description:
     "Skills of Lalit Kumar Saini across web development, QA and test automation, business operations, and digital productivity, plus certifications.",
   path: "/skills",
-});
+  });
+}
 
 const levels = [
   ["Applied in work", "Used in a real job."],

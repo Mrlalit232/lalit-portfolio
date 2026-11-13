@@ -65,6 +65,14 @@ export const ventureSchema = z.object({
   link: z.object({ label: text(60), href }).optional(),
 });
 
+export const serviceSchema = z.object({
+  id: slug,
+  title: text(80),
+  summary: text(300),
+  includes: list(12, 150),
+  idealFor: text(200),
+});
+
 export const experienceSchema = z.object({
   company: text(120),
   role: text(120),
@@ -127,6 +135,7 @@ export const profileSchema = z.object({
 
 export type ProjectData = z.infer<typeof projectSchema>;
 export type VentureData = z.infer<typeof ventureSchema>;
+export type ServiceData = z.infer<typeof serviceSchema>;
 export type ExperienceData = z.infer<typeof experienceSchema>;
 export type EducationData = z.infer<typeof educationSchema>;
 export type CertificationData = z.infer<typeof certificationSchema>;

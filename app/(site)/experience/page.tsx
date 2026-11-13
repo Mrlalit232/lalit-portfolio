@@ -1,16 +1,18 @@
-import { buildMetadata } from "@/lib/seo";
+import { pageMetadata } from "@/lib/content/page-seo";
 import { activities } from "@/data/experience";
 import { getExperience } from "@/lib/content/public";
 import { PageHero, Section, SectionHeading } from "@/components/ui/primitives";
 import { Reveal } from "@/components/ui/motion";
 import { ContactCta, ExperienceCard, RelatedLinks } from "@/components/sections/shared";
 
-export const metadata = buildMetadata({
+export async function generateMetadata() {
+  return pageMetadata({
   title: "Experience",
   description:
     "Professional experience of Lalit Kumar Saini: sales, marketing and operations at Red Hills Group, plus campus ambassador activity.",
   path: "/experience",
-});
+  });
+}
 
 export default async function ExperiencePage() {
   const experience = await getExperience();

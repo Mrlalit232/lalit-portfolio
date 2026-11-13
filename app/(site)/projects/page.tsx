@@ -1,16 +1,18 @@
-import { buildMetadata } from "@/lib/seo";
+import { pageMetadata } from "@/lib/content/page-seo";
 import { getProjects } from "@/lib/content/public";
 import { PageHero } from "@/components/ui/primitives";
 import { Container } from "@/components/ui/primitives";
 import { ProjectExplorer } from "@/components/projects/ProjectExplorer";
 import { ContactCta, RelatedLinks } from "@/components/sections/shared";
 
-export const metadata = buildMetadata({
+export async function generateMetadata() {
+  return pageMetadata({
   title: "Projects: Web Development & Testing",
   description:
     "Projects by Lalit Kumar Saini: GenIQ, a local-first AI document workbench; the BHIM Coaching Center platform; and this Next.js portfolio.",
   path: "/projects",
-});
+  });
+}
 
 export default async function ProjectsPage() {
   const projects = await getProjects();

@@ -6,13 +6,17 @@ import { hasHostedDb } from "@/db/client";
 import { contentItems } from "@/db/schema";
 import { getDb } from "@/lib/db";
 import { site } from "@/lib/site";
+import { resumePdfAvailable } from "@/lib/resume";
+import { media } from "@/db/schema";
+import { getResumeSettings, getSeoSettings, type SeoSettings } from "@/lib/settings";
 import { credentials as staticCredentials } from "@/data/credentials";
 import { experience as staticExperience } from "@/data/experience";
 import { profile as staticProfile } from "@/data/profile";
 import { projects as staticProjects } from "@/data/projects";
 import { skillGroups as staticSkillGroups } from "@/data/skills";
+import { services as staticServices } from "@/data/services";
 import { ventures as staticVentures } from "@/data/ventures";
-import type { Credential, Experience, Project, SkillGroup, Venture } from "@/data/types";
+import type { Credential, Experience, Project, Service, SkillGroup, Venture } from "@/data/types";
 import type { ProfileData, TestimonialData } from "./schemas";
 import type { ContentType } from "./registry";
 import { hasAnyContent } from "./seed";
@@ -33,6 +37,18 @@ async function tryDb(): Promise<Db | null> {
     return await getDb();
   } catch {
     return null;
+  }
+}
+
+/** True if ANY row (any status, including Trash) exists for the type, so an intentionally empty list is respected. */
+async function typeHasRows(type: ContentType) {
+  const db = await tryDb();
+  if (!db) return false;
+  try {
+    const [row] = await db.select({ id: contentItems.id }).from(contentItems).where(eq(contentItems.type, type)).limit(1);
+    return Boolean(row);
+  } catch {
+    return false;
   }
 }
 
@@ -64,6 +80,20 @@ export async function getProjects(): Promise<Project[]> {
 
 export async function getProject(slug: string): Promise<Project | undefined> {
   return (await getProjects()).find((p) => p.slug === slug);
+}
+
+/**
+ * Services were added to the CMS after the first release. Until they are imported (`npm run db:seed`) there are
+ * no service rows at all, and the built-in services are served instead of an empty page.
+ */
+export async function getServices(): Promise<Service[]> {
+  "use cache";
+  cacheTag("content:service");
+  cacheLife("minutes");
+  const rows = await readPublished("service");
+  if (!rows) return staticServices;
+  if (rows.length === 0 && !(await typeHasRows("service"))) return staticServices;
+  return rows as unknown as Service[];
 }
 
 export async function getVentures(): Promise<Venture[]> {
@@ -140,4 +170,41 @@ export async function getProfile(): Promise<PublicProfile> {
     about: { education: p.aboutEducation, paragraphs: p.aboutParagraphs, interests: p.interests },
     contact: { email: p.email, phone: p.phone, location: p.location, linkedin: p.linkedin, github: p.github },
   };
+}
+
+/** CMS-managed SEO overrides. Empty (defaults only) when the database is unavailable. */
+export async function getPublicSeo(): Promise<SeoSettings> {
+  "use cache";
+  cacheTag("settings");
+  cacheLife("minutes");
+  const db = await tryDb();
+  if (!db) return { pages: {} };
+  try {
+    return await getSeoSettings(db);
+  } catch {
+    return { pages: {} };
+  }
+}
+
+/**
+ * Where the resume PDF can be downloaded, or null when none exists: the file chosen in the Resume manager
+ * (stored in the media library), otherwise the static file in /public if present.
+ */
+export async function getResumeHref(): Promise<string | null> {
+  "use cache";
+  cacheTag("settings");
+  cacheLife("minutes");
+  const db = await tryDb();
+  if (db) {
+    try {
+      const { mediaId } = await getResumeSettings(db);
+      if (mediaId) {
+        const [row] = await db.select({ id: media.id, mime: media.mime }).from(media).where(and(eq(media.id, mediaId), isNull(media.deletedAt))).limit(1);
+        if (row?.mime === "application/pdf") return `/media/${row.id}`;
+      }
+    } catch {
+      // fall through to the static file
+    }
+  }
+  return resumePdfAvailable() ? site.resumePdf : null;
 }

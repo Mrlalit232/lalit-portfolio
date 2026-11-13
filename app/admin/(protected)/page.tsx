@@ -5,13 +5,13 @@ import { requireAdmin } from "@/lib/auth/guard";
 import { getDb } from "@/lib/db";
 import { entities, type ContentType } from "@/lib/content/registry";
 import { hasAnyContent } from "@/lib/content/seed";
-import { dashboardStats, healthCheck } from "@/lib/content/stats";
+import { dashboardExtras, dashboardStats, healthCheck } from "@/lib/content/stats";
 import { formatDate, LinkButton, PageHeader, StatusBadge, EmptyState } from "@/components/admin/ui";
 
 export default async function Dashboard() {
   const user = await requireAdmin();
   const db = await getDb();
-  const [stats, health, seeded] = await Promise.all([dashboardStats(db), healthCheck(db), hasAnyContent(db)]);
+  const [stats, health, seeded, extras] = await Promise.all([dashboardStats(db), healthCheck(db), hasAnyContent(db), dashboardExtras(db)]);
   const { counts } = stats;
   const pending = Object.values(counts).reduce((n, c) => n + c.withUnpublishedChanges, 0);
   const moduleOf = (t: string) => entities[t as ContentType]?.module ?? "";
@@ -22,8 +22,13 @@ export default async function Dashboard() {
     { label: "Experience", value: counts.experience.total, sub: `${counts.experience.published} published`, href: "/admin/experience" },
     { label: "Education", value: counts.education.total, sub: `${counts.education.published} published`, href: "/admin/education" },
     { label: "Certifications", value: counts.certification.total, sub: `${counts.certification.published} published`, href: "/admin/certifications" },
+    { label: "Services", value: counts.service.total, sub: `${counts.service.published} published · ${counts.service.draft} draft`, href: "/admin/services" },
     { label: "Ventures", value: counts.venture.total, sub: `${counts.venture.published} published · ${counts.venture.draft} draft`, href: "/admin/ventures" },
     { label: "Testimonials", value: counts.testimonial.total, sub: counts.testimonial.published ? `${counts.testimonial.published} published` : "None published (section hidden)", href: "/admin/testimonials" },
+    { label: "Unread messages", value: extras.unreadMessages, sub: extras.unreadMessages ? "Waiting in the inbox" : "Inbox is clear", href: "/admin/messages" },
+    { label: "Scheduled to publish", value: extras.scheduled, sub: extras.scheduled ? "Will go live automatically" : "Nothing scheduled", href: "/admin/projects" },
+    { label: "Views (7 days)", value: extras.views7, sub: "Privacy-friendly page-view count", href: "/admin/analytics" },
+    { label: "Media files", value: extras.mediaFiles, sub: `${extras.redirects} active redirect(s)`, href: "/admin/media" },
     { label: "Unpublished changes", value: pending, sub: pending ? "Edits waiting to go live" : "Everything live is up to date", href: "/admin/projects" },
   ];
 
@@ -33,6 +38,7 @@ export default async function Dashboard() {
     { href: "/admin/certifications/new", label: "Add certification" },
     { href: "/admin/ventures/new", label: "Add venture" },
     { href: "/admin/testimonials/new", label: "Add testimonial" },
+    { href: "/admin/media", label: "Upload media" },
     { href: "/admin/profile", label: "Update profile" },
   ];
 
@@ -49,7 +55,7 @@ export default async function Dashboard() {
       ok: seeded,
       detail: seeded ? "Served from the database (published items only)" : "Using the built-in static content. Run `npm run db:seed` to import it into the database.",
     },
-    { icon: HardDrive, label: "File storage", ok: false, detail: "Not configured. The media library is not part of this release, so images are referenced by URL." },
+    { icon: HardDrive, label: "File storage", ok: true, detail: `Media library stores ${extras.mediaFiles} file(s) in the database (PNG, JPEG, GIF, WebP, PDF up to 3 MB each).` },
     { icon: Activity, label: "Application", ok: true, detail: `Running on Node ${process.version}` },
   ];
 

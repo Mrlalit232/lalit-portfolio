@@ -1,9 +1,11 @@
-import { and, asc, desc, eq, ilike, isNotNull, isNull, ne, or, sql } from "drizzle-orm";
+import { and, asc, desc, eq, ilike, isNotNull, isNull, lte, ne, or, sql } from "drizzle-orm";
 import type { Db } from "@/db/client";
 import { contentItems, type ContentItem } from "@/db/schema";
 import { logActivity } from "@/lib/activity";
+import { ensureAutoRedirect } from "@/lib/redirects";
 import { issuesToFieldErrors } from "./codec";
-import { slugOf, titleOf, type EntityDef } from "./registry";
+import { entities, slugOf, titleOf, type ContentType, type EntityDef } from "./registry";
+import { getRevision, recordRevision, type RevisionReason } from "./revisions";
 
 export type StatusFilter = "all" | "draft" | "published" | "archived" | "trash";
 
@@ -91,12 +93,13 @@ export async function createItem(db: Db, def: EntityDef, actorId: string, input:
       updatedBy: actorId,
     })
     .returning();
+  await recordRevision(db, def, item.id, v.data, "save", actorId);
   await logActivity(db, { actorId, action: `${def.type}.create`, entityType: def.type, entityId: item.id, summary: `Created ${def.singular.toLowerCase()} “${item.title}” as a draft` });
   return { ok: true, item, message: `${def.singular} saved as a draft.` };
 }
 
 /** Saves edits into the draft overlay. A published item stays live and unchanged until publish. */
-export async function saveDraft(db: Db, def: EntityDef, id: string, actorId: string, input: Record<string, unknown>): Promise<Result> {
+export async function saveDraft(db: Db, def: EntityDef, id: string, actorId: string, input: Record<string, unknown>, reason: RevisionReason = "save"): Promise<Result> {
   const item = await getItem(db, def, id);
   if (!item || item.deletedAt) return fail(`${def.singular} not found.`);
   const v = validate(def, input);
@@ -110,6 +113,7 @@ export async function saveDraft(db: Db, def: EntityDef, id: string, actorId: str
     patch.slug = slug;
   }
   const [saved] = await db.update(contentItems).set(patch).where(eq(contentItems.id, id)).returning();
+  await recordRevision(db, def, id, v.data, reason, actorId);
   await logActivity(db, { actorId, action: `${def.type}.save`, entityType: def.type, entityId: id, summary: `Saved draft of ${def.singular.toLowerCase()} “${titleOf(def, v.data)}”` });
   return { ok: true, item: saved, message: item.status === "published" ? "Draft saved. The live version is unchanged until you publish." : "Draft saved." };
 }
@@ -132,11 +136,17 @@ export async function publish(db: Db, def: EntityDef, id: string, actorId: strin
       slug,
       title: titleOf(def, v.data),
       publishedAt: item.publishedAt ?? new Date(),
+      publishAt: null,
       updatedAt: new Date(),
       updatedBy: actorId,
     })
     .where(eq(contentItems.id, id))
     .returning();
+  await recordRevision(db, def, id, v.data, "publish", actorId);
+  // A published URL changed: keep the old link working.
+  if (def.type === "project" && item.status === "published" && item.slug && slug && item.slug !== slug) {
+    await ensureAutoRedirect(db, actorId, `/projects/${item.slug}`, `/projects/${slug}`);
+  }
   await logActivity(db, { actorId, action: `${def.type}.publish`, entityType: def.type, entityId: id, summary: `Published ${def.singular.toLowerCase()} “${saved.title}”` });
   return { ok: true, item: saved, message: `${def.singular} published.` };
 }
@@ -150,6 +160,7 @@ export async function unpublish(db: Db, def: EntityDef, id: string, actorId: str
     .set({ status: "draft", draft: item.draft ?? item.data, updatedAt: new Date(), updatedBy: actorId })
     .where(eq(contentItems.id, id))
     .returning();
+  await recordRevision(db, def, id, (item.draft ?? item.data) as Record<string, unknown>, "unpublish", actorId);
   await logActivity(db, { actorId, action: `${def.type}.unpublish`, entityType: def.type, entityId: id, summary: `Unpublished ${def.singular.toLowerCase()} “${saved.title}”` });
   return { ok: true, item: saved, message: `${def.singular} unpublished. It is now a draft and no longer public.` };
 }
@@ -248,4 +259,66 @@ export async function move(db: Db, def: EntityDef, id: string, actorId: string, 
 export async function saveSingleton(db: Db, def: EntityDef, actorId: string, input: Record<string, unknown>): Promise<Result> {
   const existing = await getSingleton(db, def);
   return existing ? saveDraft(db, def, existing.id, actorId, input) : createItem(db, def, actorId, input);
+}
+
+/* ---------------- revisions ---------------- */
+/** Puts an earlier snapshot back as the draft. Nothing goes live until it is published. */
+export async function restoreRevision(db: Db, def: EntityDef, id: string, revisionId: string, actorId: string): Promise<Result> {
+  const item = await getItem(db, def, id);
+  if (!item || item.deletedAt) return fail(`${def.singular} not found.`);
+  const rev = await getRevision(db, id, revisionId);
+  if (!rev) return fail("Revision not found.");
+  const res = await saveDraft(db, def, id, actorId, rev.data, "restore");
+  if (!res.ok) return { ...res, error: res.error ?? "That revision no longer passes validation." };
+  await logActivity(db, { actorId, action: `${def.type}.restore_revision`, entityType: def.type, entityId: id, summary: `Restored revision ${rev.version} of “${rev.title}” into the draft` });
+  return { ok: true, item: res.item, message: `Revision ${rev.version} restored as a draft. Publish it to make it live.` };
+}
+
+/* ---------------- scheduled publishing ---------------- */
+/** Sets (or clears, with null) the time a pending draft goes live automatically. */
+export async function schedulePublish(db: Db, def: EntityDef, id: string, actorId: string, when: Date | null): Promise<Result> {
+  const item = await getItem(db, def, id);
+  if (!item || item.deletedAt) return fail(`${def.singular} not found.`);
+  if (item.status === "archived") return fail("Archived items cannot be scheduled. Unarchive first.");
+  if (when === null) {
+    const [saved] = await db.update(contentItems).set({ publishAt: null, updatedAt: new Date(), updatedBy: actorId }).where(eq(contentItems.id, id)).returning();
+    await logActivity(db, { actorId, action: `${def.type}.unschedule`, entityType: def.type, entityId: id, summary: `Cancelled scheduled publishing of “${saved.title}”` });
+    return { ok: true, item: saved, message: "Schedule cancelled." };
+  }
+  if (Number.isNaN(when.getTime()) || when.getTime() < Date.now() + 30_000) return fail("Choose a time in the future.");
+  if (item.status === "published" && !item.draft) return fail("There are no unpublished changes to schedule.");
+  const v = validate(def, workingCopy(item));
+  if (!v.ok) return { ok: false, fieldErrors: v.fieldErrors, error: "Fix the highlighted fields before scheduling." };
+  const [saved] = await db.update(contentItems).set({ publishAt: when, updatedAt: new Date(), updatedBy: actorId }).where(eq(contentItems.id, id)).returning();
+  await logActivity(db, { actorId, action: `${def.type}.schedule`, entityType: def.type, entityId: id, summary: `Scheduled “${saved.title}” to publish at ${when.toISOString()}` });
+  return { ok: true, item: saved, message: `Scheduled to publish at ${when.toUTCString()}.` };
+}
+
+/**
+ * Publishes every item whose scheduled time has passed. Safe to call often and from several places
+ * (admin pages, the cron endpoint, public reads). Returns the content types that changed so callers can
+ * invalidate caches. An item that no longer validates has its schedule cleared and is reported.
+ */
+export async function publishDue(db: Db, now = new Date()) {
+  const due = await db
+    .select()
+    .from(contentItems)
+    .where(and(isNotNull(contentItems.publishAt), lte(contentItems.publishAt, now), isNull(contentItems.deletedAt)));
+  const changed = new Set<ContentType>();
+  const failed: { id: string; title: string; error: string }[] = [];
+  for (const item of due) {
+    const def = entities[item.type as ContentType];
+    if (!def) continue;
+    const eligible = item.status === "draft" || (item.status === "published" && Boolean(item.draft));
+    const res: Result = eligible ? await publish(db, def, item.id, item.updatedBy ?? item.createdBy ?? "") : { ok: false, error: "No longer eligible." };
+    if (res.ok) {
+      changed.add(def.type);
+      await logActivity(db, { action: `${def.type}.scheduled_publish`, entityType: def.type, entityId: item.id, summary: `Scheduled publish ran for “${item.title}”` });
+    } else {
+      await db.update(contentItems).set({ publishAt: null }).where(eq(contentItems.id, item.id));
+      failed.push({ id: item.id, title: item.title, error: res.error ?? "Validation failed." });
+      await logActivity(db, { action: `${def.type}.schedule_failed`, entityType: def.type, entityId: item.id, summary: `Scheduled publish of “${item.title}” was skipped: ${res.error ?? "validation failed"}` });
+    }
+  }
+  return { changed: [...changed], failed };
 }

@@ -31,7 +31,7 @@ export function ContactForm() {
     return (
       <div role="status" className="surface rounded-3xl p-8 text-center">
         <CheckCircle2 aria-hidden className="mx-auto h-10 w-10 text-tech" />
-        <h2 className="mt-4 font-display text-3xl text-fg">Message sent</h2>
+        <h2 className="mt-4 font-display text-3xl text-fg">Message received</h2>
         <p className="mt-2 text-fg-muted">{state.message}</p>
       </div>
     );

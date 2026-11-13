@@ -6,6 +6,7 @@ import {
   experienceSchema,
   profileSchema,
   projectSchema,
+  serviceSchema,
   skillGroupSchema,
   skillLevels,
   testimonialSchema,
@@ -15,6 +16,7 @@ import {
 export type ContentType =
   | "project"
   | "venture"
+  | "service"
   | "experience"
   | "education"
   | "certification"
@@ -105,6 +107,24 @@ export const entities: Record<ContentType, EntityDef> = {
       { name: "note", label: "Honest status note", kind: "textarea", rows: 2, required: true },
       { name: "link.label", label: "Link label (optional)", kind: "text" },
       { name: "link.href", label: "Link URL (optional)", kind: "text" },
+    ],
+  },
+  service: {
+    type: "service",
+    module: "services",
+    singular: "Service",
+    plural: "Services",
+    description: "Services offered, shown on the Services page and the homepage preview.",
+    schema: serviceSchema as unknown as EntityDef["schema"],
+    slugKey: "id",
+    titleKey: "title",
+    subtitle: (d) => s(d.summary),
+    fields: [
+      { name: "title", label: "Service name", kind: "text", required: true },
+      { name: "id", label: "Anchor ID", kind: "text", required: true, help: "Lowercase, hyphens. Unique.", placeholder: "website-development" },
+      { name: "summary", label: "Summary", kind: "textarea", rows: 3, required: true },
+      { name: "includes", label: "What is included", kind: "lines", help: lines, rows: 5 },
+      { name: "idealFor", label: "Ideal for", kind: "text", required: true },
     ],
   },
   experience: {

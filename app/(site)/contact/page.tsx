@@ -2,17 +2,19 @@ import type React from "react";
 import { Suspense } from "react";
 import { Briefcase, Handshake, Mail, Rocket } from "lucide-react";
 import { GithubIcon, LinkedinIcon } from "@/components/ui/icons";
-import { buildMetadata } from "@/lib/seo";
+import { pageMetadata } from "@/lib/content/page-seo";
 import { getProfile } from "@/lib/content/public";
 import { ContactForm } from "@/components/contact/ContactForm";
 import { Container, PageHero } from "@/components/ui/primitives";
 
-export const metadata = buildMetadata({
+export async function generateMetadata() {
+  return pageMetadata({
   title: "Contact",
   description:
     "Contact Lalit Kumar Saini about employment opportunities, website projects or business collaboration.",
   path: "/contact",
-});
+  });
+}
 
 const reasons = [
   { icon: Briefcase, title: "Employment", text: "Roles in web development, QA and testing, or business operations." },

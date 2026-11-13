@@ -8,8 +8,11 @@ import { dataToValues } from "@/lib/content/codec";
 import { entityByModule } from "@/lib/content/registry";
 import { publicPath } from "@/lib/content/seed";
 import { getItem, workingCopy } from "@/lib/content/service";
+import { listRevisions } from "@/lib/content/revisions";
+import { PREVIEWABLE, listPreviewLinks } from "@/lib/content/preview";
 import { ContentForm } from "@/components/admin/ContentForm";
 import { ItemActions } from "@/components/admin/ItemActions";
+import { ItemTools } from "@/components/admin/ItemTools";
 import { Notice } from "@/components/admin/Notice";
 import { formatDate, PageHeader, StatusBadge } from "@/components/admin/ui";
 
@@ -27,6 +30,9 @@ export default async function EditItem({ params }: PageProps<"/admin/[module]/[i
 
   const deleted = Boolean(item.deletedAt);
   const live = item.status === "published" && !deleted;
+  const db = await getDb();
+  const [revisions, links] = await Promise.all([listRevisions(db, item.id), listPreviewLinks(db, item.id)]);
+  const activeLinks = links.filter((l) => l.active).length;
 
   return (
     <div className="space-y-6">
@@ -76,6 +82,20 @@ export default async function EditItem({ params }: PageProps<"/admin/[module]/[i
           fields={def.fields}
           initial={dataToValues(def.fields, workingCopy(item))}
           canPublish={can(user.role, "content:publish")}
+        />
+      )}
+
+      {!deleted && (
+        <ItemTools
+          module={module}
+          id={item.id}
+          previewable={PREVIEWABLE.includes(def.type)}
+          canWrite={can(user.role, "content:write")}
+          canPublish={can(user.role, "content:publish")}
+          schedulable={item.status !== "archived" && !(item.status === "published" && !item.draft)}
+          publishAt={item.publishAt ? item.publishAt.toISOString() : null}
+          activePreviewLinks={activeLinks}
+          revisions={revisions.slice(0, 20).map((r) => ({ id: r.id, version: r.version, reason: r.reason, title: r.title, createdAt: r.createdAt.toISOString() }))}
         />
       )}
     </div>

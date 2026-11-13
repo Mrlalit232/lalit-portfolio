@@ -4,6 +4,7 @@
  *
  *   npm run admin:create          create an administrator
  *   npm run admin:reset-password  recovery: set a new password (revokes all sessions)
+ *   npm run admin:reset-2fa       recovery: turn off two-factor authentication for an account
  *
  * Needs database access (DATABASE_URL, or the local embedded database in development),
  * so only someone who controls the infrastructure can run it.
@@ -11,6 +12,7 @@
 import { createDb, runMigrations } from "../db/client";
 import { checkPasswordStrength } from "../lib/auth/password";
 import { createAdminUser, findUserByEmail, setUserPassword } from "../lib/auth/users";
+import { adminResetTwoFactor } from "../lib/auth/twofactor";
 import { ask, askHidden, requireTty } from "./prompt";
 
 async function readNewPassword(email: string) {
@@ -31,8 +33,8 @@ async function readNewPassword(email: string) {
 
 async function main() {
   const command = process.argv[2];
-  if (command !== "create" && command !== "reset-password") {
-    console.error("Usage: admin.ts <create|reset-password>");
+  if (command !== "create" && command !== "reset-password" && command !== "reset-2fa") {
+    console.error("Usage: admin.ts <create|reset-password|reset-2fa>");
     process.exit(1);
   }
   requireTty();
@@ -49,6 +51,10 @@ async function main() {
       const password = await readNewPassword(email);
       const user = await createAdminUser(handle.db, { email, password, name: name || undefined });
       console.log(`Created administrator ${user.email}. You can now sign in at /admin/login.`);
+    } else if (command === "reset-2fa") {
+      const done = await adminResetTwoFactor(handle.db, email);
+      if (!done) throw new Error("No account with that email.");
+      console.log("Two-factor authentication was turned off for that account. Sign in with your password, then set it up again.");
     } else {
       const user = await findUserByEmail(handle.db, email);
       if (!user) throw new Error("No account with that email.");

@@ -6,6 +6,7 @@ import { can } from "@/lib/auth/permissions";
 import { getDb } from "@/lib/db";
 import { entityByModule } from "@/lib/content/registry";
 import { listItems, workingCopy, type StatusFilter } from "@/lib/content/service";
+import { BulkProvider, RowCheck } from "@/components/admin/Bulk";
 import { ItemActions } from "@/components/admin/ItemActions";
 import { EmptyState, formatDate, LinkButton, PageHeader, StatusBadge } from "@/components/admin/ui";
 import { cn } from "@/components/ui/primitives";
@@ -43,10 +44,15 @@ export default async function ModuleList({ params, searchParams }: PageProps<"/a
   };
   const rows = tab === "trash" ? trash : tab === "all" ? live : live.filter((i) => i.status === tab);
   const reorderable = tab === "all" && !q;
-  const href = (status: StatusFilter) => {
+  const PAGE_SIZE = 20;
+  const pageCount = Math.max(1, Math.ceil(rows.length / PAGE_SIZE));
+  const pageNo = Math.min(Math.max(Number.parseInt(typeof sp.page === "string" ? sp.page : "1", 10) || 1, 1), pageCount);
+  const visible = rows.slice((pageNo - 1) * PAGE_SIZE, pageNo * PAGE_SIZE);
+  const href = (status: StatusFilter, page = 1) => {
     const p = new URLSearchParams();
     if (status !== "all") p.set("status", status);
     if (q) p.set("q", q);
+    if (page > 1) p.set("page", String(page));
     const s = p.toString();
     return `/admin/${module}${s ? `?${s}` : ""}`;
   };
@@ -114,12 +120,22 @@ export default async function ModuleList({ params, searchParams }: PageProps<"/a
           }
         />
       ) : (
+        <BulkProvider
+          module={module}
+          singular={def.singular}
+          ids={visible.map((i) => i.id)}
+          inTrash={tab === "trash"}
+          canWrite={can(user.role, "content:write")}
+          canPublish={can(user.role, "content:publish")}
+          canDelete={can(user.role, "content:delete")}
+        >
         <ul className="surface divide-y divide-line rounded-3xl">
-          {rows.map((item) => {
+          {visible.map((item) => {
             const data = workingCopy(item);
             const deleted = Boolean(item.deletedAt);
             return (
               <li key={item.id} className="flex flex-wrap items-center gap-3 px-5 py-4">
+                <RowCheck id={item.id} label={item.title} />
                 <div className="min-w-0 flex-1 basis-60">
                   {deleted ? (
                     <p className="truncate font-medium">{item.title}</p>
@@ -134,6 +150,7 @@ export default async function ModuleList({ params, searchParams }: PageProps<"/a
                 <div className="flex items-center gap-1.5">
                   <StatusBadge tone={deleted ? "trash" : item.status}>{deleted ? "in trash" : item.status}</StatusBadge>
                   {!deleted && item.status === "published" && item.draft && <StatusBadge tone="draft">unpublished changes</StatusBadge>}
+                  {!deleted && item.publishAt && <StatusBadge tone="neutral">scheduled {formatDate(item.publishAt)}</StatusBadge>}
                 </div>
                 <ItemActions
                   module={module}
@@ -151,6 +168,19 @@ export default async function ModuleList({ params, searchParams }: PageProps<"/a
             );
           })}
         </ul>
+        </BulkProvider>
+      )}
+
+      {pageCount > 1 && (
+        <nav aria-label="Pagination" className="flex items-center justify-between gap-3 text-sm">
+          <span className="text-fg-muted">
+            Page {pageNo} of {pageCount} · {rows.length} items
+          </span>
+          <span className="flex gap-2">
+            {pageNo > 1 && <Link prefetch={false} href={href(tab, pageNo - 1)} className="rounded-full border border-line-strong px-4 py-1.5 hover:bg-white/[0.06]">Previous</Link>}
+            {pageNo < pageCount && <Link prefetch={false} href={href(tab, pageNo + 1)} className="rounded-full border border-line-strong px-4 py-1.5 hover:bg-white/[0.06]">Next</Link>}
+          </span>
+        </nav>
       )}
     </div>
   );

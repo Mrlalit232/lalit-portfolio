@@ -4,10 +4,13 @@ import { users } from "@/db/schema";
 import { logActivity } from "@/lib/activity";
 import { checkLoginAllowed, clearFailures, purgeOldAttempts, recordAttempt } from "./ratelimit";
 import { createSession, keyedHash, purgeExpiredSessions } from "./sessions";
+import { isTwoFactorEnabled } from "./twofactor";
 import { authenticate, normalizeEmail } from "./users";
 
 export type LoginResult =
-  | { ok: true; token: string; expiresAt: Date }
+  | { ok: true; twoFactor?: false; token: string; expiresAt: Date }
+  /** Password was correct but the account has 2FA: no session yet, finish with completeSecondFactor(). */
+  | { ok: true; twoFactor: true; userId: string }
   | { ok: false; reason: "invalid" }
   | { ok: false; reason: "locked"; retryAfterSec: number };
 
@@ -30,6 +33,7 @@ export async function attemptLogin(
   }
 
   await clearFailures(db, accountKey);
+  if (isTwoFactorEnabled(user)) return { ok: true, twoFactor: true, userId: user.id };
   const session = await createSession(db, { userId: user.id, ipHash: ipKey, userAgent: input.userAgent });
   await db.update(users).set({ lastLoginAt: new Date() }).where(eq(users.id, user.id));
   await logActivity(db, { actorId: user.id, action: "auth.login", summary: "Signed in" });

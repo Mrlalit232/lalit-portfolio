@@ -1,11 +1,9 @@
 import Link from "next/link";
 import { ArrowRight, Cpu, Download, Handshake, Sparkles } from "lucide-react";
-import { buildMetadata, profilePageJsonLd } from "@/lib/seo";
+import { profilePageJsonLd } from "@/lib/seo";
+import { pageMetadata } from "@/lib/content/page-seo";
 import { JsonLd } from "@/components/ui/JsonLd";
-import { site } from "@/lib/site";
-import { resumePdfAvailable } from "@/lib/resume";
-import { services } from "@/data/services";
-import { getCredentials, getExperience, getProfile, getProjects, getSkillGroups, getTestimonials, getVentures } from "@/lib/content/public";
+import { getCredentials, getExperience, getProfile, getProjects, getResumeHref, getServices, getSkillGroups, getTestimonials, getVentures } from "@/lib/content/public";
 import { ButtonLink, Container, Section, SectionHeading, accentDot, cn } from "@/components/ui/primitives";
 import { Reveal, Stagger, StaggerItem } from "@/components/ui/motion";
 import { ProjectCard } from "@/components/projects/ProjectCard";
@@ -19,13 +17,15 @@ import {
   SkillGroups,
 } from "@/components/sections/shared";
 
-export const metadata = buildMetadata({
+export async function generateMetadata() {
+  return pageMetadata({
   title: "Lalit Kumar Saini | Portfolio: Web Development & QA Testing",
   absoluteTitle: true,
   description:
     "Lalit Kumar Saini: BCA student with web development projects, a QA and test automation focus, and hands-on client, sales and operations experience.",
   path: "/",
-});
+  });
+}
 
 const pillars = [
   {
@@ -52,8 +52,8 @@ const pillars = [
 ];
 
 export default async function HomePage() {
-  const pdfReady = resumePdfAvailable();
-  const [profile, projects, experience, skillGroups, credentials, ventures, testimonials] = await Promise.all([
+  const resumeHref = await getResumeHref();
+  const [profile, projects, experience, skillGroups, credentials, ventures, testimonials, services] = await Promise.all([
     getProfile(),
     getProjects(),
     getExperience(),
@@ -61,6 +61,7 @@ export default async function HomePage() {
     getCredentials(),
     getVentures(),
     getTestimonials(),
+    getServices(),
   ]);
   const featuredProjects = projects.filter((p) => p.featured);
   return (
@@ -92,8 +93,8 @@ export default async function HomePage() {
                 <ButtonLink href="/contact" variant="secondary">
                   Contact Me
                 </ButtonLink>
-                {pdfReady ? (
-                  <ButtonLink href={site.resumePdf} variant="ghost" download>
+                {resumeHref ? (
+                  <ButtonLink href={resumeHref} variant="ghost" download>
                     <Download aria-hidden className="h-4 w-4" />
                     Download Resume
                   </ButtonLink>

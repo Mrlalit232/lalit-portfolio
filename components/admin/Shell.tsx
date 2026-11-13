@@ -5,19 +5,27 @@ import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import {
   Activity,
+  ArrowRightLeft,
   Award,
+  BarChart3,
   Briefcase,
   ChevronRight,
+  ConciergeBell,
   ExternalLink,
+  FileText,
   FolderKanban,
+  Globe,
   GraduationCap,
+  Images,
   LayoutDashboard,
   LogOut,
+  Mail,
   Menu,
   MessageSquareQuote,
   Moon,
   Rocket,
   Search,
+  ShieldCheck,
   Sparkles,
   Sun,
   User,
@@ -26,18 +34,43 @@ import {
 import { cn } from "@/components/ui/primitives";
 import { logoutAction } from "@/app/admin/login/actions";
 
-const NAV = [
-  { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/admin/profile", label: "Profile", icon: User },
-  { href: "/admin/projects", label: "Projects", icon: FolderKanban },
-  { href: "/admin/skills", label: "Skills", icon: Sparkles },
-  { href: "/admin/experience", label: "Experience", icon: Briefcase },
-  { href: "/admin/education", label: "Education", icon: GraduationCap },
-  { href: "/admin/certifications", label: "Certifications", icon: Award },
-  { href: "/admin/ventures", label: "Ventures", icon: Rocket },
-  { href: "/admin/testimonials", label: "Testimonials", icon: MessageSquareQuote },
-  { href: "/admin/activity", label: "Activity", icon: Activity },
+type NavItem = { href: string; label: string; icon: typeof Mail };
+const NAV_GROUPS: { heading?: string; items: NavItem[] }[] = [
+  { items: [{ href: "/admin", label: "Dashboard", icon: LayoutDashboard }] },
+  {
+    heading: "Content",
+    items: [
+      { href: "/admin/profile", label: "Profile", icon: User },
+      { href: "/admin/projects", label: "Projects", icon: FolderKanban },
+      { href: "/admin/skills", label: "Skills", icon: Sparkles },
+      { href: "/admin/experience", label: "Experience", icon: Briefcase },
+      { href: "/admin/education", label: "Education", icon: GraduationCap },
+      { href: "/admin/certifications", label: "Certifications", icon: Award },
+      { href: "/admin/services", label: "Services", icon: ConciergeBell },
+      { href: "/admin/ventures", label: "Ventures", icon: Rocket },
+      { href: "/admin/testimonials", label: "Testimonials", icon: MessageSquareQuote },
+    ],
+  },
+  {
+    heading: "Site",
+    items: [
+      { href: "/admin/media", label: "Media library", icon: Images },
+      { href: "/admin/resume", label: "Resume", icon: FileText },
+      { href: "/admin/seo", label: "SEO", icon: Globe },
+      { href: "/admin/redirects", label: "Redirects", icon: ArrowRightLeft },
+    ],
+  },
+  {
+    heading: "Inbox & insights",
+    items: [
+      { href: "/admin/messages", label: "Messages", icon: Mail },
+      { href: "/admin/analytics", label: "Analytics", icon: BarChart3 },
+      { href: "/admin/activity", label: "Activity", icon: Activity },
+    ],
+  },
+  { heading: "Account", items: [{ href: "/admin/security", label: "Security", icon: ShieldCheck }] },
 ];
+const NAV = NAV_GROUPS.flatMap((g) => g.items);
 
 const LABELS: Record<string, string> = Object.fromEntries([
   ...NAV.map((n) => [n.href.split("/")[2] ?? "", n.label] as const),
@@ -103,33 +136,44 @@ function Breadcrumbs() {
   );
 }
 
-function NavList({ onNavigate }: { onNavigate?: () => void }) {
+function NavList({ onNavigate, unread = 0 }: { onNavigate?: () => void; unread?: number }) {
   const pathname = usePathname();
   return (
-    <nav aria-label="Admin" className="flex flex-col gap-0.5">
-      {NAV.map(({ href, label, icon: Icon }) => {
-        const active = href === "/admin" ? pathname === "/admin" : pathname === href || pathname.startsWith(`${href}/`);
-        return (
-          <Link
-            key={href}
-            href={href}
-            onClick={onNavigate}
-            aria-current={active ? "page" : undefined}
-            className={cn(
-              "flex items-center gap-3 rounded-xl px-3 py-2 text-sm transition-colors",
-              active ? "bg-white/[0.08] font-medium text-fg" : "text-fg-muted hover:bg-white/[0.04] hover:text-fg",
-            )}
-          >
-            <Icon aria-hidden className={cn("h-4 w-4", active && "text-tech")} />
-            {label}
-          </Link>
-        );
-      })}
+    <nav aria-label="Admin" className="flex min-h-0 flex-col gap-4 overflow-y-auto">
+      {NAV_GROUPS.map((group, gi) => (
+        <div key={gi} className="flex flex-col gap-0.5">
+          {group.heading && <p className="px-3 pb-1 font-mono text-[10px] uppercase tracking-[0.18em] text-fg-subtle">{group.heading}</p>}
+          {group.items.map(({ href, label, icon: Icon }) => {
+            const active = href === "/admin" ? pathname === "/admin" : pathname === href || pathname.startsWith(`${href}/`);
+            return (
+              <Link
+                key={href}
+                prefetch={false}
+                href={href}
+                onClick={onNavigate}
+                aria-current={active ? "page" : undefined}
+                className={cn(
+                  "flex items-center gap-3 rounded-xl px-3 py-1.5 text-sm transition-colors",
+                  active ? "bg-white/[0.08] font-medium text-fg" : "text-fg-muted hover:bg-white/[0.04] hover:text-fg",
+                )}
+              >
+                <Icon aria-hidden className={cn("h-4 w-4", active && "text-tech")} />
+                {label}
+                {href === "/admin/messages" && unread > 0 && (
+                  <span className="ml-auto rounded-full bg-tech/20 px-2 py-0.5 font-mono text-[11px] text-tech" aria-label={`${unread} unread`}>
+                    {unread}
+                  </span>
+                )}
+              </Link>
+            );
+          })}
+        </div>
+      ))}
     </nav>
   );
 }
 
-export function AdminShell({ user, children }: { user: { email: string; role: string }; children: React.ReactNode }) {
+export function AdminShell({ user, unread = 0, children }: { user: { email: string; role: string }; unread?: number; children: React.ReactNode }) {
   const pathname = usePathname();
   const [open, setOpen] = useState<string | null>(null);
   const drawerOpen = open === pathname; // closes automatically on navigation
@@ -159,7 +203,7 @@ export function AdminShell({ user, children }: { user: { email: string; role: st
           <span aria-hidden className="grid h-9 w-9 place-items-center rounded-xl border border-line-strong font-display text-lg">L</span>
           <span className="text-sm font-medium">Portfolio CMS</span>
         </Link>
-        <NavList />
+        <NavList unread={unread} />
         <Link prefetch={false} href="/" target="_blank" rel="noopener" className="mt-auto flex items-center gap-2 rounded-xl px-3 py-2 text-sm text-fg-muted hover:bg-white/[0.04] hover:text-fg">
           <ExternalLink aria-hidden className="h-4 w-4" /> View public site
         </Link>
@@ -176,7 +220,7 @@ export function AdminShell({ user, children }: { user: { email: string; role: st
                 <X aria-hidden className="h-4 w-4" />
               </button>
             </div>
-            <NavList onNavigate={() => setOpen(null)} />
+            <NavList onNavigate={() => setOpen(null)} unread={unread} />
             <Link prefetch={false} href="/" target="_blank" rel="noopener" className="mt-4 flex items-center gap-2 rounded-xl px-3 py-2 text-sm text-fg-muted hover:text-fg">
               <ExternalLink aria-hidden className="h-4 w-4" /> View public site
             </Link>

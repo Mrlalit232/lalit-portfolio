@@ -7,6 +7,7 @@ import { experience } from "@/data/experience";
 import { profile } from "@/data/profile";
 import { projects } from "@/data/projects";
 import { skillGroups } from "@/data/skills";
+import { services } from "@/data/services";
 import { ventures } from "@/data/ventures";
 import { site } from "@/lib/site";
 import { entities, slugOf, titleOf, type ContentType } from "./registry";
@@ -33,6 +34,7 @@ function buildSeeds(): Seed[] {
   });
   for (const p of projects) seeds.push({ type: "project", data: { ...p } });
   for (const v of ventures) seeds.push({ type: "venture", data: { ...v } });
+  for (const sv of services) seeds.push({ type: "service", data: { ...sv } });
   for (const e of experience) seeds.push({ type: "experience", data: { ...e } });
   for (const g of skillGroups) seeds.push({ type: "skillGroup", data: { ...g } });
   for (const c of credentials) {
@@ -103,6 +105,8 @@ export function publicPath(type: ContentType, data: Record<string, unknown>) {
       return `/projects/${String(data.slug ?? "")}`;
     case "venture":
       return `/ventures#${String(data.id ?? "")}`;
+    case "service":
+      return "/services";
     case "experience":
       return "/experience";
     case "skillGroup":

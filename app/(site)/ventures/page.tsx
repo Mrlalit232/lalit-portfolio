@@ -1,16 +1,18 @@
-import { buildMetadata } from "@/lib/seo";
+import { pageMetadata } from "@/lib/content/page-seo";
 import { getVentures } from "@/lib/content/public";
 import { PageHero, Section, SectionHeading } from "@/components/ui/primitives";
 import { Reveal } from "@/components/ui/motion";
 import { ContactCta, RelatedLinks } from "@/components/sections/shared";
 import { VentureDetail } from "@/components/sections/VentureCard";
 
-export const metadata = buildMetadata({
+export async function generateMetadata() {
+  return pageMetadata({
   title: "Entrepreneurship & Ventures",
   description:
     "Entrepreneurial initiatives by Lalit Kumar Saini: an early-stage website development business, plus two concepts: a business solutions platform and a business collaboration ecosystem.",
   path: "/ventures",
-});
+  });
+}
 
 export default async function VenturesPage() {
   const ventures = await getVentures();

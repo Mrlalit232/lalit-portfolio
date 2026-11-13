@@ -1,6 +1,6 @@
 import { and, count, desc, eq, isNull, sql } from "drizzle-orm";
 import type { Db } from "@/db/client";
-import { activityLog, contentItems, users } from "@/db/schema";
+import { activityLog, contactMessages, contentItems, media, pageViews, redirects, users } from "@/db/schema";
 import { entities, type ContentType } from "./registry";
 
 export type TypeCounts = { total: number; published: number; draft: number; archived: number; withUnpublishedChanges: number };
@@ -88,4 +88,23 @@ export async function healthCheck(db: Db) {
   } catch (error) {
     return { ok: false, ms: 0, error: error instanceof Error ? error.message : "unknown error" };
   }
+}
+
+/** Counts for the dashboard cards that are not content items. Each is a real query. */
+export async function dashboardExtras(db: Db) {
+  const since = new Date(Date.now() - 6 * 86_400_000).toISOString().slice(0, 10);
+  const [scheduled, unread, files, views, activeRedirects] = await Promise.all([
+    db.select({ n: count() }).from(contentItems).where(sql`${contentItems.publishAt} is not null and ${contentItems.deletedAt} is null`),
+    db.select({ n: count() }).from(contactMessages).where(eq(contactMessages.status, "new")),
+    db.select({ n: count() }).from(media).where(isNull(media.deletedAt)),
+    db.select({ n: sql<number>`coalesce(sum(${pageViews.views}), 0)` }).from(pageViews).where(sql`${pageViews.day} >= ${since}`),
+    db.select({ n: count() }).from(redirects).where(eq(redirects.enabled, true)),
+  ]);
+  return {
+    scheduled: Number(scheduled[0]?.n ?? 0),
+    unreadMessages: Number(unread[0]?.n ?? 0),
+    mediaFiles: Number(files[0]?.n ?? 0),
+    views7: Number(views[0]?.n ?? 0),
+    redirects: Number(activeRedirects[0]?.n ?? 0),
+  };
 }

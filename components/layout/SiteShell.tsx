@@ -3,6 +3,7 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { personJsonLd, websiteJsonLd } from "@/lib/seo";
 import { JsonLd } from "@/components/ui/JsonLd";
+import { PageViewBeacon } from "@/components/layout/PageViewBeacon";
 
 /** Public-site chrome: skip link, structured data, header, main landmark, footer. */
 export function SiteShell({ children }: { children: ReactNode }) {
@@ -19,6 +20,9 @@ export function SiteShell({ children }: { children: ReactNode }) {
       {/* usePathname() is request-time on dynamic routes (e.g. /projects/[slug]); the placeholder keeps layout stable. */}
       <Suspense fallback={<div aria-hidden className="fixed inset-x-0 top-0 z-50 h-16" />}>
         <Header />
+      </Suspense>
+      <Suspense fallback={null}>
+        <PageViewBeacon />
       </Suspense>
       <main id="main" className="flex-1">
         {children}

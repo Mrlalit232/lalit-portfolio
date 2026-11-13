@@ -2,9 +2,14 @@
 
 import { headers } from "next/headers";
 import { getProfile } from "@/lib/content/public";
+import { getDb, hasHostedDb } from "@/lib/db";
+import { markEmailed, storeMessage } from "@/lib/messages";
 import { contactSchema, inquiryTypes, type ContactInput, type ContactState } from "@/lib/contact";
 
 /**
+ * Delivery: every valid message is first SAVED to the admin inbox (when a database is available), then emailed if
+ * delivery is configured. Success is only reported when at least one of the two really happened.
+ *
  * Spam protection, in layers:
  *  1. Honeypot field that real users never see or fill.
  *  2. Minimum fill time: bots submit instantly.
@@ -76,12 +81,25 @@ export async function submitContact(_prev: ContactState, formData: FormData): Pr
   const data = parsed.data;
   const typeLabel = inquiryTypes.find((t) => t.value === data.type)?.label ?? data.type;
 
+  // 1. Save to the inbox (the durable record). A database problem must not lose the email path below.
+  let savedId: string | null = null;
+  if (hasHostedDb() || process.env.NODE_ENV !== "production" || process.env.ALLOW_LOCAL_DB === "1") {
+    try {
+      savedId = (await storeMessage(await getDb(), { type: data.type, name: data.name, email: data.email, company: data.company, message: data.message })).id;
+    } catch (error) {
+      console.error("Could not save contact message:", error instanceof Error ? error.message : error);
+    }
+  }
+
   const apiKey = process.env.RESEND_API_KEY;
   const to = process.env.CONTACT_TO_EMAIL;
   const from = process.env.CONTACT_FROM_EMAIL;
 
   if (!apiKey || !to || !from) {
-    // Nothing is sent, so never report success.
+    if (savedId) {
+      return { status: "success", message: "Thanks, your message has been received and saved. I will reply by email." };
+    }
+    // Neither saved nor emailed, so never report success.
     const publicEmail = (await getProfile()).contact.email;
     const mailto = publicEmail
       ? `mailto:${publicEmail}?subject=${encodeURIComponent(`${typeLabel} from ${data.name}`)}&body=${encodeURIComponent(data.message)}`
@@ -113,10 +131,13 @@ ${data.company ? `<p><strong>Company:</strong> ${escapeHtml(data.company)}</p>` 
       }),
     });
     if (!res.ok) {
+      if (savedId) return { status: "success", message: "Thanks, your message has been received and saved. I will reply by email." };
       return { status: "error", message: "The message could not be delivered. Please try again, or use the email link on this page.", values };
     }
+    if (savedId) await markEmailed(await getDb(), savedId).catch(() => {});
     return { status: "success", message: "Thanks, your message has been sent. I will reply by email." };
   } catch {
+    if (savedId) return { status: "success", message: "Thanks, your message has been received and saved. I will reply by email." };
     return { status: "error", message: "A network error occurred. Please try again shortly.", values };
   }
 }
