@@ -217,6 +217,14 @@ log((await page.locator("ul li", { hasText: /big|page|run|x\.svg/ }).count()) ==
   log(pubH.get("x-content-type-options") === "nosniff" && pubH.get("x-frame-options") === "DENY" && /strict-origin/.test(pubH.get("referrer-policy") ?? "") && /camera=\(\)/.test(pubH.get("permissions-policy") ?? "") && /max-age=\d+/.test(pubH.get("strict-transport-security") ?? ""), "public pages send nosniff, X-Frame-Options, Referrer-Policy, Permissions-Policy and HSTS");
   const admH = (await get("/admin/login")).headers;
   log(/no-store/.test(admH.get("cache-control") ?? "") && /noindex/.test(admH.get("x-robots-tag") ?? "") && /frame-ancestors 'none'/.test(admH.get("content-security-policy") ?? ""), "admin responses are no-store, noindex and carry a CSP");
+  // Content-Security-Policy on public pages, the 404 page, project pages and the admin: same strict, first-party-only policy.
+  for (const path of ["/", "/projects/geniq", "/admin/login", "/definitely-not-a-page"]) {
+    const csp = (await get(path)).headers.get("content-security-policy") ?? "";
+    const ok =
+      /default-src 'self'/.test(csp) && /object-src 'none'/.test(csp) && /frame-ancestors 'none'/.test(csp) && /form-action 'self'/.test(csp) && /base-uri 'self'/.test(csp) &&
+      /connect-src 'self'(;|$)/.test(csp) && !/unsafe-eval/.test(csp) && !/https?:\/\//.test(csp) && !/\*/.test(csp);
+    log(ok, `CSP on ${path} is first-party only (no third-party origin, no eval, no framing, no foreign form target)`);
+  }
   const m = await get("/media/00000000-0000-4000-8000-000000000000");
   log(m.status === 404 && !LEAK.test(m.text), "a missing media id leaks nothing");
   log(!/x-powered-by/i.test([...pubH.keys()].join(",")), "the server does not advertise X-Powered-By");
