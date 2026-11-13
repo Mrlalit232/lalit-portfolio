@@ -1,6 +1,6 @@
 export type NavItem = { label: string; href: string };
 
-export type ProjectCategory = "AI & Software" | "Web Platforms" | "Personal Brand";
+export type ProjectCategory = string;
 
 export type ProjectLink = { label: string; href: string };
 

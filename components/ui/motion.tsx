@@ -1,84 +1,44 @@
-"use client";
-
-import { MotionConfig, motion, useReducedMotion } from "motion/react";
 import type { ReactNode } from "react";
 
-/** Makes every Motion animation honour the user's reduced-motion setting. */
-export function MotionProvider({ children }: { children: ReactNode }) {
-  return <MotionConfig reducedMotion="user">{children}</MotionConfig>;
-}
-
-/** Scroll-triggered reveal. Renders static content when reduced motion is requested. */
+/**
+ * Entrance animations, implemented in CSS only (see globals.css): no animation library and no client JavaScript.
+ *  - Below the fold: scroll-driven reveal (`animation-timeline: view()`). Browsers without support simply show the
+ *    content, so nothing is ever hidden waiting for JavaScript.
+ *  - Above the fold (`eager`): a short time-based fade that never delays first paint.
+ * `prefers-reduced-motion` disables all of it.
+ */
 export function Reveal({
   children,
   delay = 0,
   className,
-  y = 18,
+  eager = false,
 }: {
   children: ReactNode;
+  /** Seconds. Applies to `eager` (time-based) reveals only. */
   delay?: number;
   className?: string;
-  y?: number;
+  /** Above-the-fold content: animate by time instead of scroll position. */
+  eager?: boolean;
 }) {
-  const reduce = useReducedMotion();
-  if (reduce) return <div className={className}>{children}</div>;
-  return (
-    <motion.div
-      className={className}
-      initial={{ opacity: 0, y }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-60px" }}
-      transition={{ duration: 0.6, delay, ease: [0.22, 1, 0.36, 1] }}
-    >
-      {children}
-    </motion.div>
-  );
+  if (eager)
+    return (
+      <div className={`fade-up ${className ?? ""}`} style={{ animationDelay: `${delay}s` }}>
+        {children}
+      </div>
+    );
+  return <div className={`reveal ${className ?? ""}`}>{children}</div>;
 }
 
-/** Staggered list container; wrap children in <StaggerItem>. */
+/** Container for a group of <StaggerItem>s (each reveals as it scrolls into view). */
 export function Stagger({ children, className }: { children: ReactNode; className?: string }) {
-  const reduce = useReducedMotion();
-  if (reduce) return <div className={className}>{children}</div>;
-  return (
-    <motion.div
-      className={className}
-      initial="hidden"
-      whileInView="show"
-      viewport={{ once: true, margin: "-60px" }}
-      variants={{ hidden: {}, show: { transition: { staggerChildren: 0.08 } } }}
-    >
-      {children}
-    </motion.div>
-  );
+  return <div className={className}>{children}</div>;
 }
 
 export function StaggerItem({ children, className }: { children: ReactNode; className?: string }) {
-  const reduce = useReducedMotion();
-  if (reduce) return <div className={className}>{children}</div>;
-  return (
-    <motion.div
-      className={className}
-      variants={{
-        hidden: { opacity: 0, y: 16 },
-        show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] } },
-      }}
-    >
-      {children}
-    </motion.div>
-  );
+  return <div className={`reveal ${className ?? ""}`}>{children}</div>;
 }
 
-/** Soft fade/slide used on route changes (see app/template.tsx). */
+/** Soft fade/slide on route changes (see app/(site)/template.tsx). CSS-only so the page is visible in the server HTML. */
 export function PageTransition({ children }: { children: ReactNode }) {
-  const reduce = useReducedMotion();
-  if (reduce) return <>{children}</>;
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-    >
-      {children}
-    </motion.div>
-  );
+  return <div className="page-in">{children}</div>;
 }

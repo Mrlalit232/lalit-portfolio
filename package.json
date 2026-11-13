@@ -6,24 +6,48 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test": "vitest run",
+    "test:seo": "node scripts/seo-audit.mjs",
+    "e2e:setup": "node --env-file-if-exists=.env.local --import tsx scripts/e2e-setup.ts",
+    "test:e2e": "node tests/e2e/admin.mjs && node tests/e2e/permissions.mjs && node tests/e2e/cms.mjs && node tests/e2e/ventures.mjs && node tests/e2e/public.mjs",
+    "test:smoke": "node tests/e2e/smoke.mjs",
+    "test:a11y": "node tests/e2e/a11y.mjs",
+    "test:security": "node tests/e2e/security.mjs",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "node --env-file-if-exists=.env.local --import tsx scripts/migrate.ts",
+    "setup:local": "node --env-file-if-exists=.env.local --import tsx scripts/setup-local.ts",
+    "admin:create": "node --env-file-if-exists=.env.local --import tsx scripts/admin.ts create",
+    "admin:reset-password": "node --env-file-if-exists=.env.local --import tsx scripts/admin.ts reset-password",
+    "admin:reset-2fa": "node --env-file-if-exists=.env.local --import tsx scripts/admin.ts reset-2fa",
+    "db:seed": "node --env-file-if-exists=.env.local --import tsx scripts/seed.ts",
+    "db:info": "node --env-file-if-exists=.env.local --import tsx scripts/db-info.ts"
   },
   "dependencies": {
+    "@electric-sql/pglite": "^0.5.16",
+    "@neondatabase/serverless": "^1.2.0",
+    "@node-rs/argon2": "^2.2.2",
+    "drizzle-orm": "^0.45.4",
     "lucide-react": "^1.72.0",
-    "motion": "^14.13.0",
     "next": "16.4.6",
     "react": "19.3.0",
     "react-dom": "19.3.0",
+    "server-only": "^0.0.1",
     "zod": "^4.6.7"
   },
   "devDependencies": {
     "@tailwindcss/turbopack": "4.3.3",
-    "@types/node": "^20",
+    "@types/node": "^24.19.2",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "axe-core": "^4.14.0",
+    "drizzle-kit": "^0.31.11",
     "eslint": "^9",
     "eslint-config-next": "16.4.6",
+    "playwright-core": "^1.65.0",
     "tailwindcss": "4.3.3",
-    "typescript": "^5"
+    "tsx": "^4.23.15",
+    "typescript": "^5",
+    "vitest": "^5.1.0"
   }
 }
