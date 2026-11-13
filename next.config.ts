@@ -10,6 +10,8 @@ const nextConfig: NextConfig = {
   // Optional override so a second server (e.g. automated testing) can run beside `next dev`.
   distDir: process.env.NEXT_DIST_DIR || ".next",
   cacheComponents: true,
+  // Do not advertise the framework in an X-Powered-By header.
+  poweredByHeader: false,
   partialPrefetching: true,
   // Embedded Postgres (local development only) loads its own WASM files at runtime.
   serverExternalPackages: ["@electric-sql/pglite"],

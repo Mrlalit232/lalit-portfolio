@@ -229,10 +229,14 @@ html[data-admin-theme="light"] .admin-scope {
   --line-strong: rgb(15 23 42 / 0.22);
   --fg: #0f172a;
   --fg-muted: #475569;
-  --fg-subtle: #64748b;
+  --fg-subtle: #566174; /* >= 4.5:1 on the light surfaces (WCAG AA) */
   --tech: #0369a1;
   --business: #b45309;
   --creative: #6d28d9;
+}
+/* Pale red used on the dark theme fails contrast on white: use a deeper red in the light theme. */
+html[data-admin-theme="light"] .admin-scope .text-red-400 {
+  color: #b91c1c;
 }
 html[data-admin-theme="light"] .admin-scope .surface {
   background: #ffffff;

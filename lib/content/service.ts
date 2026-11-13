@@ -3,6 +3,7 @@ import type { Db } from "@/db/client";
 import { contentItems, type ContentItem } from "@/db/schema";
 import { logActivity } from "@/lib/activity";
 import { ensureAutoRedirect } from "@/lib/redirects";
+import { stripNul, stripNulDeep } from "@/lib/text";
 import { issuesToFieldErrors } from "./codec";
 import { entities, slugOf, titleOf, type ContentType, type EntityDef } from "./registry";
 import { getRevision, recordRevision, type RevisionReason } from "./revisions";
@@ -19,7 +20,8 @@ const escapeLike = (q: string) => q.replace(/[\\%_]/g, (c) => `\\${c}`);
 /** The editable version of an item: pending draft if any, otherwise the live copy. */
 export const workingCopy = (item: ContentItem) => (item.draft ?? item.data) as Record<string, unknown>;
 
-function validate(def: EntityDef, data: Record<string, unknown>) {
+function validate(def: EntityDef, input: Record<string, unknown>) {
+  const data = stripNulDeep(input);
   const parsed = def.schema.safeParse(data);
   if (parsed.success) return { ok: true as const, data: JSON.parse(JSON.stringify(parsed.data)) as Record<string, unknown> };
   return { ok: false as const, fieldErrors: issuesToFieldErrors(def.fields, parsed.error.issues) };
@@ -31,8 +33,8 @@ export async function listItems(db: Db, def: EntityDef, opts: { status?: StatusF
   const where = [eq(contentItems.type, def.type)];
   where.push(status === "trash" ? isNotNull(contentItems.deletedAt) : isNull(contentItems.deletedAt));
   if (status === "draft" || status === "published" || status === "archived") where.push(eq(contentItems.status, status));
-  if (opts.q?.trim()) {
-    const like = `%${escapeLike(opts.q.trim())}%`;
+  if (opts.q && stripNul(opts.q).trim()) {
+    const like = `%${escapeLike(stripNul(opts.q).trim())}%`;
     where.push(or(ilike(contentItems.title, like), sql`${contentItems.data}::text ilike ${like}`, sql`${contentItems.draft}::text ilike ${like}`)!);
   }
   return db.select().from(contentItems).where(and(...where)).orderBy(asc(contentItems.sortOrder), desc(contentItems.updatedAt));

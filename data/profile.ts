@@ -2,19 +2,19 @@ export const profile = {
   name: "Lalit Kumar Saini",
   headline: "Technology × Business × Creativity",
   intro:
-    "A BCA student who builds web projects, tests software with a QA mindset, and has hands-on experience handling clients, leads and day-to-day operations.",
+    "A BCA student focused on software quality and testing, who also builds web projects and has hands-on experience handling clients, leads and day-to-day operations.",
   focusAreas: [
-    {
-      id: "web",
-      title: "Web Development",
-      accent: "tech" as const,
-      body: "Building responsive interfaces with React, Next.js and Vite, with attention to structure and usability.",
-    },
     {
       id: "qa",
       title: "QA & Test Automation",
       accent: "tech" as const,
       body: "Learning and practising manual testing, test-case design, bug reporting and Python-based automation.",
+    },
+    {
+      id: "web",
+      title: "Web Development",
+      accent: "tech" as const,
+      body: "Building responsive interfaces with React, Next.js and Vite, with attention to structure and usability.",
     },
     {
       id: "business",

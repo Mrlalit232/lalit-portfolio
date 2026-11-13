@@ -31,9 +31,11 @@ export async function generateMetadata({ params }: PageProps<"/projects/[slug]">
  * Case studies are managed in the CMS; the data comes from the tagged cache and is invalidated when content is
  * published or unpublished. Suspense keeps the page shell streaming-friendly.
  */
+// The fallback is taller than the viewport on purpose: if the page streams in (after a cache refresh), the footer below
+// starts off-screen, so it cannot visibly jump (a layout shift) when the real content replaces the placeholder.
 export default function ProjectPage({ params }: PageProps<"/projects/[slug]">) {
   return (
-    <Suspense fallback={<div className="min-h-[60vh]" aria-hidden />}>
+    <Suspense fallback={<div className="min-h-[130vh]" aria-hidden />}>
       <ProjectBody params={params} />
     </Suspense>
   );

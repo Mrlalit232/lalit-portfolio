@@ -76,7 +76,7 @@ export default async function HomePage() {
             <div>
               <p className="inline-flex items-center gap-2 rounded-full border border-line bg-white/[0.03] px-3.5 py-1.5 text-xs text-fg-muted">
                 <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-tech" />
-                BCA student · Web · QA · Operations
+                BCA student · QA · Web · Operations
               </p>
               <h1 className="mt-6 font-display text-6xl leading-[0.95] tracking-tight text-fg sm:text-7xl lg:text-8xl">
                 {profile.name}
@@ -156,7 +156,7 @@ export default async function HomePage() {
       </Section>
 
       {/* B. Focus areas */}
-      <Section labelledBy="focus-heading" className="border-t border-line bg-ink-900/40">
+      <Section defer labelledBy="focus-heading" className="border-t border-line bg-ink-900/40">
         <Reveal>
           <SectionHeading
             eyebrow="Professional focus"
@@ -179,7 +179,7 @@ export default async function HomePage() {
       </Section>
 
       {/* C. Featured projects */}
-      <Section labelledBy="projects-heading" className="border-t border-line">
+      <Section defer labelledBy="projects-heading" className="border-t border-line">
         <div className="flex flex-wrap items-end justify-between gap-6">
           <Reveal>
             <SectionHeading
@@ -202,7 +202,7 @@ export default async function HomePage() {
       </Section>
 
       {/* D. Experience */}
-      <Section labelledBy="exp-heading" className="border-t border-line bg-ink-900/40">
+      <Section defer labelledBy="exp-heading" className="border-t border-line bg-ink-900/40">
         <Reveal>
           <SectionHeading
             eyebrow="Professional experience"
@@ -223,7 +223,7 @@ export default async function HomePage() {
       </Section>
 
       {/* E. Skills */}
-      <Section labelledBy="skills-heading" className="border-t border-line">
+      <Section defer labelledBy="skills-heading" className="border-t border-line">
         <div className="flex flex-wrap items-end justify-between gap-6">
           <Reveal>
             <SectionHeading
@@ -241,7 +241,7 @@ export default async function HomePage() {
       </Section>
 
       {/* F. Services preview */}
-      <Section labelledBy="services-heading" className="border-t border-line bg-ink-900/40">
+      <Section defer labelledBy="services-heading" className="border-t border-line bg-ink-900/40">
         <div className="flex flex-wrap items-end justify-between gap-6">
           <Reveal>
             <SectionHeading
@@ -261,7 +261,7 @@ export default async function HomePage() {
       </Section>
 
       {/* Ventures preview */}
-      <Section labelledBy="ventures-heading" className="border-t border-line">
+      <Section defer labelledBy="ventures-heading" className="border-t border-line">
         <div className="flex flex-wrap items-end justify-between gap-6">
           <Reveal>
             <SectionHeading
@@ -285,7 +285,7 @@ export default async function HomePage() {
       </Section>
 
       {/* G. Certifications */}
-      <Section labelledBy="cred-heading" className="border-t border-line bg-ink-900/40">
+      <Section defer labelledBy="cred-heading" className="border-t border-line bg-ink-900/40">
         <Reveal>
           <SectionHeading
             eyebrow="Certifications & achievements"
@@ -301,7 +301,7 @@ export default async function HomePage() {
 
       {/* Testimonials: only genuine, published ones; hidden entirely when there are none */}
       {testimonials.length > 0 && (
-        <Section labelledBy="testimonials-heading" className="border-t border-line">
+        <Section defer labelledBy="testimonials-heading" className="border-t border-line">
           <Reveal>
             <SectionHeading eyebrow="Testimonials" accent="creative" title={<span id="testimonials-heading">What people say.</span>} />
           </Reveal>

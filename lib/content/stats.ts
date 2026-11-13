@@ -1,6 +1,7 @@
 import { and, count, desc, eq, isNull, sql } from "drizzle-orm";
 import type { Db } from "@/db/client";
 import { activityLog, contactMessages, contentItems, media, pageViews, redirects, users } from "@/db/schema";
+import { stripNul } from "@/lib/text";
 import { entities, type ContentType } from "./registry";
 
 export type TypeCounts = { total: number; published: number; draft: number; archived: number; withUnpublishedChanges: number };
@@ -70,7 +71,8 @@ export async function recentActivityFull(db: Db, limit = 100) {
 }
 
 /** Cross-module search over titles and content, excluding Trash. */
-export async function searchAll(db: Db, q: string) {
+export async function searchAll(db: Db, rawQuery: string) {
+  const q = stripNul(rawQuery);
   const like = `%${q.replace(/[\\%_]/g, (c) => `\\${c}`)}%`;
   return db
     .select({ id: contentItems.id, type: contentItems.type, title: contentItems.title, status: contentItems.status, updatedAt: contentItems.updatedAt })

@@ -63,11 +63,11 @@ export default async function Dashboard() {
     <div className="space-y-8">
       <PageHeader title="Dashboard" description={`Signed in as ${user.email}. All figures come from the database.`} />
 
-      <section aria-label="Content overview" className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <section aria-label="Content overview" className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
         {cards.map((c) => (
-          <Link prefetch={false} key={c.label} href={c.href} className="surface surface-hover rounded-2xl p-5">
+          <Link prefetch={false} key={c.label} href={c.href} className="surface surface-hover min-w-0 rounded-2xl p-4 sm:p-5">
             <p className="text-sm text-fg-muted">{c.label}</p>
-            <p className="mt-2 font-display text-4xl">{c.value}</p>
+            <p className="mt-2 font-display text-3xl sm:text-4xl">{c.value}</p>
             <p className="mt-1 text-xs text-fg-subtle">{c.sub}</p>
           </Link>
         ))}

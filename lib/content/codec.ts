@@ -38,7 +38,7 @@ const splitLines = (v: string) => v.split(/\r?\n/).map((s) => s.trim()).filter(B
 /** Raw submitted strings, used to refill the form after a validation error. */
 export function rawValues(fields: FieldDef[], fd: FormData): FormValues {
   const out: FormValues = {};
-  for (const f of fields) out[f.name] = f.kind === "boolean" ? fd.get(f.name) === "on" : String(fd.get(f.name) ?? "");
+  for (const f of fields) out[f.name] = f.kind === "boolean" ? fd.get(f.name) === "on" : String(fd.get(f.name) ?? "").replace(/\u0000/g, "");
   return out;
 }
 

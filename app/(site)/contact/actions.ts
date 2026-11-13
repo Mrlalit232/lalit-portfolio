@@ -4,6 +4,7 @@ import { headers } from "next/headers";
 import { getProfile } from "@/lib/content/public";
 import { getDb, hasHostedDb } from "@/lib/db";
 import { markEmailed, storeMessage } from "@/lib/messages";
+import { stripNul } from "@/lib/text";
 import { contactSchema, inquiryTypes, type ContactInput, type ContactState } from "@/lib/contact";
 
 /**
@@ -37,6 +38,8 @@ const escapeHtml = (s: string) =>
   s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!);
 
 export async function submitContact(_prev: ContactState, formData: FormData): Promise<ContactState> {
+  // NUL characters cannot be stored in Postgres; remove them before anything reads the form.
+  for (const [k, v] of [...formData.entries()]) if (typeof v === "string" && v.includes("\u0000")) formData.set(k, stripNul(v));
   const values = {
     type: String(formData.get("type") ?? ""),
     name: String(formData.get("name") ?? ""),

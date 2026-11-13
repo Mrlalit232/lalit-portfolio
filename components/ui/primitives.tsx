@@ -69,14 +69,21 @@ export function Section({
   className,
   children,
   labelledBy,
+  defer = false,
 }: {
   id?: string;
   className?: string;
   children: ReactNode;
   labelledBy?: string;
+  /**
+   * Skip rendering until near the viewport (`content-visibility: auto`). Use ONLY for sections that start below the
+   * first screen: the browser estimates the height of a skipped section, and one that straddles the viewport would
+   * shift the content below it (layout shift) when its real height replaces the estimate.
+   */
+  defer?: boolean;
 }) {
   return (
-    <section id={id} aria-labelledby={labelledBy} className={cn("defer-render py-16 sm:py-24", className)}>
+    <section id={id} aria-labelledby={labelledBy} className={cn(defer && "defer-render", "py-16 sm:py-24", className)}>
       <Container>{children}</Container>
     </section>
   );
