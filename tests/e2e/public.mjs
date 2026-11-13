@@ -117,7 +117,7 @@ for (const w of widths) {
 {
   const ctx = await browser.newContext({ viewport: { width: 1280, height: 900 } });
   const page = await ctx.newPage();
-  const body = async (p) => { await page.goto(BASE + p, { waitUntil: "networkidle" }); return page.locator("main").innerText(); };
+  const body = async (p) => { await page.goto(BASE + p, { waitUntil: "networkidle" }); return page.locator("main").evaluate((m) => m.textContent ?? ""); }; // textContent: includes off-screen sections that content-visibility:auto skips for innerText
   let t = await body("/projects/geniq");
   log(t.includes("Team Leader & Project Developer"), "GenIQ role corrected");
   log(!/Challenges/i.test(t), "GenIQ has no Challenges section");

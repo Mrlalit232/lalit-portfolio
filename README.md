@@ -1,6 +1,6 @@
 # Lalit Kumar Saini: Portfolio
 
-Multipage portfolio built with Next.js 16 (App Router, Cache Components), TypeScript, Tailwind CSS 4, Motion and Zod.
+Multipage portfolio built with Next.js 16 (App Router, Cache Components), TypeScript, Tailwind CSS 4, Zod, Drizzle ORM and Postgres.
 
 ## Develop
 
@@ -77,7 +77,7 @@ Apply migrations with `npm run db:migrate`, then `npm run db:seed`.
 | `npm run lint` / `npx tsc --noEmit` | ESLint and TypeScript |
 | `npm test` | Unit and integration tests against a real in-memory Postgres (auth, content engine, SEO helpers) |
 | `npm run test:seo` | SEO and indexability audit of a running build (titles, descriptions, canonicals, Open Graph, JSON-LD, sitemap, robots, 404s, internal links) |
-| `npm run test:e2e` | Browser tests (Playwright + Chrome): admin auth, CMS CRUD and publish flow, Ventures, public site at nine widths. See `tests/e2e/README.md` |
+| `npm run test:e2e` | Browser tests (Playwright + Chrome): admin auth and security, Owner/Editor permission enforcement (Server Action replay), CMS CRUD and publish flow, Ventures, public site at nine widths. See `tests/e2e/README.md` |
 
 The browser tests run only against a throwaway database created by `npm run e2e:setup`, which refuses to touch
 your real local database or any hosted database.

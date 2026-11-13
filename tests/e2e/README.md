@@ -17,7 +17,7 @@ BASE_URL=http://localhost:3130 npm run test:seo
 ```
 
 PowerShell: set variables with `$env:NAME = "value"` instead of the `NAME=value` prefix.
-`CHROME_PATH` overrides the Chrome location. Suites: `admin` (login, throttling, sessions, access control),
+`CHROME_PATH` overrides the Chrome location. Suites: `admin` (login, throttling, sessions, access control), `permissions` (Owner vs Editor vs anonymous: captured Server Action requests are replayed with other credentials; an Owner replay is the control),
 `cms` (full CRUD, draft/publish, public sync, validation, layouts), `ventures`, `public` (every page at nine widths:
 console errors, overflow, headings, images, mobile navigation). Re-run `e2e:setup` with a fresh `PGLITE_DIR` if a run is
 interrupted, because the suites create and clean up their own test records.

@@ -6,6 +6,7 @@ export const BASE = (process.env.BASE_URL ?? "http://localhost:3000").replace(/\
 /** Password of the throwaway admin created by `npm run e2e:setup`. Never a real account. */
 export const PW = process.env.E2E_PASSWORD ?? "";
 export const ADMIN_EMAIL = "e2e-admin@example.test";
+export const EDITOR_EMAIL = "e2e-editor@example.test";
 
 /** Uses CHROME_PATH if set, otherwise the locally installed Google Chrome (no browser download needed). */
 export const launch = () =>

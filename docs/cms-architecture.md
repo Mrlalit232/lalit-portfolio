@@ -1,6 +1,18 @@
 # Portfolio CMS: Milestone 1 Audit & Architecture Plan
 
-Status: **proposal for review. No application code has been changed.**
+> **Status: this is the original Milestone 1 planning document, kept for the reasoning behind the design.** The
+> implementation differs in places; where it does, **section 11 and this box win**.
+>
+> **Implemented:** Profile, Projects, Skills, Experience, Education, Certifications, Ventures and Testimonials modules; draft
+> overlay with Publish/Unpublish; Archive, Trash/Restore/Delete forever, Duplicate, Reorder; search; activity log; Owner and
+> Editor roles enforced server-side (tested by replaying captured Server Actions); a single `content_items` table instead of one
+> table per type; public site reads published content through a tagged cache with a static fallback to `data/`.
+> **Not implemented (documented, not hidden):** media library and uploads (images are URLs), revision history, scheduled
+> publishing, preview links, autosave, bulk actions, pages/sections and navigation managers, SEO and site-settings managers,
+> redirects, contact-message inbox, analytics, JSON export, 2FA, user-management UI.
+> **Test tooling now exists:** `npm test` (Vitest), `npm run test:seo`, `npm run test:e2e` (see README). The animation library
+> mentioned below (Motion) has since been removed; reveals and transitions are CSS-only.
+
 Audited commit: `1009fb6` on `main` (3,741 lines across tracked source files).
 
 ---
@@ -8,7 +20,7 @@ Audited commit: `1009fb6` on `main` (3,741 lines across tracked source files).
 ## 1. Audit of the existing repository
 
 ### Stack
-Next.js 16.4.6 (App Router, **Cache Components on**, Partial Prefetching on, Turbopack), React 19.3, TypeScript strict, Tailwind 4, Motion 14, Zod 4, lucide-react. No test framework, no `test` script.
+Next.js 16.4.6 (App Router, **Cache Components on**, Partial Prefetching on, Turbopack), React 19.3, TypeScript strict, Tailwind 4, Motion 14 (since removed), Zod 4, lucide-react. (At the time of this audit: no test framework, no `test` script.)
 
 ### Routes (all prerendered)
 `/`, `/about`, `/experience`, `/projects`, `/projects/[slug]` (`generateStaticParams`), `/skills`, `/services`, `/ventures`, `/resume`, `/contact`, `sitemap.xml`, `robots.txt`, generated `icon.svg`, `apple-icon`, `opengraph-image`, `twitter-image`, plus `not-found` and `error`.

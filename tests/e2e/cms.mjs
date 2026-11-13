@@ -117,8 +117,16 @@ await toast("live version is unchanged");
 await page.waitForTimeout(1000);
 log((await page.getByText("unpublished changes").count()) > 0, "editor shows the 'unpublished changes' badge");
 {
-  const r = await pub("/projects/e2e-project");
-  log(r.html.includes("E2E Project") && !r.html.includes("RENAMED"), "live page still shows the old title while the edit is only a draft");
+  // Invariant: the draft title must NEVER appear publicly. The old title may take a moment on a cold server.
+  let leaked = false;
+  let ok = false;
+  for (let i = 0; i < 12 && !ok && !leaked; i++) {
+    const r = await pub("/projects/e2e-project");
+    leaked = r.html.includes("RENAMED");
+    ok = r.status === 200 && r.html.includes("E2E Project");
+    if (!ok && !leaked) await sleep(400);
+  }
+  log(ok && !leaked, "live page still shows the old title while the edit is only a draft (draft never leaks)");
 }
 await page.getByRole("button", { name: "Publish changes" }).click();
 await toast("published");

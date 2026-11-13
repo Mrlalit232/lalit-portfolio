@@ -37,20 +37,23 @@ the realistic early wins are branded queries and specific project/technology lon
 - **Breadcrumbs** (visible and structured) and a "Keep exploring" block with descriptive internal links on the main pages.
 - **Canonical consistency**: one origin from `NEXT_PUBLIC_SITE_URL`, no trailing slash, no query strings in the sitemap.
   Real HTTP 404 for unknown URLs, including unknown project slugs.
-- **Core Web Vitals work**: page content no longer waits for JavaScript to become visible (the route transition and
-  hero entrance are CSS-only); Motion's feature set is lazy-loaded; fonts via `next/font` (self-hosted).
+- **Core Web Vitals work**: the animation library (Motion) was removed. Route transitions, the hero entrance and
+  scroll reveals are CSS-only (scroll reveals use `animation-timeline: view()` and simply show the content in browsers
+  without support), so no content waits for JavaScript. Reveals only slide (no opacity change), so text is always
+  contrast-compliant. Off-screen sections use `content-visibility: auto`. Fonts via `next/font` (self-hosted).
 - **Automated checks**: `npm run test:seo` (see README) audits all of the above against a running build.
 
-## Known trade-off: project page metadata
+## Case-study metadata (resolved)
 
-Project pages resolve metadata per request so a newly published project never serves a stale "not found" head.
-Next.js therefore streams their `<title>`/`<meta>` into the page body for ordinary browsers, and sends them in `<head>`
-for crawlers in Next's built-in list (Bing, DuckDuckGo, Apple, Yandex, Baidu, Twitter/X, LinkedIn, Facebook, Slack,
-Discord, WhatsApp and Google's inspection/renderer bots). Googlebot is not in that list because Google renders
-JavaScript and reads streamed metadata. Lighthouse (which is not in the list) therefore scores a case-study page 91
-on SEO with "no meta description" even though crawlers receive it. Forcing head metadata for every client
-(`htmlLimitedBots: /.*/`) was tried and **breaks link prefetching**, so it is not used. Check a case study with
-Search Console's URL Inspection after launch.
+Case studies used to resolve metadata per request, which made Next.js stream `<title>` and `<meta>` into the page
+body for ordinary browsers (crawlers on Next's list received them in `<head>`). Forcing head metadata for every client
+with `htmlLimitedBots: /.*/` was tried and **broke link prefetching**, so it was rejected.
+
+The fix is structural: `generateStaticParams()` prerenders every published case study, so their metadata is part of
+the static `<head>` for every client (browser, Googlebot, Bing, LinkedIn). A case study published after a build renders on
+demand and is then cached. `proxy.ts` returns a real 404 for slugs that are not published, so a "not found" result is never
+cached for a slug that is about to be published. This is verified by `tests/e2e/cms.mjs` (draft -> 404, publish -> 200,
+unpublish -> 404) and by the SEO audit (metadata present for plain-browser, Googlebot and LinkedIn user agents).
 
 ## Search Console and Bing readiness (not done; needs your accounts and a live domain)
 
