@@ -18,6 +18,10 @@ const TABS: { key: StatusFilter; label: string }[] = [
   { key: "trash", label: "Trash" },
 ];
 
+// Private, session-gated page that is never prerendered; Next's instant-navigation validation (which flags every
+// session/params/searchParams read) does not apply. Blocking on the server is the intended behaviour here.
+export const instant = false;
+
 export default async function ModuleList({ params, searchParams }: PageProps<"/admin/[module]">) {
   const user = await requireAdmin("content:read");
   const { module } = await params;

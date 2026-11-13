@@ -38,6 +38,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
+      data-scroll-behavior="smooth"
+      // The admin theme script sets data-admin-theme on <html> before hydration; the attribute is intentionally client-set.
+      suppressHydrationWarning
       className={`${geistSans.variable} ${geistMono.variable} ${display.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col">

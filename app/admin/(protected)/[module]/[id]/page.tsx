@@ -13,6 +13,10 @@ import { ItemActions } from "@/components/admin/ItemActions";
 import { Notice } from "@/components/admin/Notice";
 import { formatDate, PageHeader, StatusBadge } from "@/components/admin/ui";
 
+// Private, session-gated page that is never prerendered; Next's instant-navigation validation (which flags every
+// session/params/searchParams read) does not apply. Blocking on the server is the intended behaviour here.
+export const instant = false;
+
 export default async function EditItem({ params }: PageProps<"/admin/[module]/[id]">) {
   const user = await requireAdmin("content:read");
   const { module, id } = await params;

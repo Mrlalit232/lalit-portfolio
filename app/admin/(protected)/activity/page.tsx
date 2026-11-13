@@ -3,6 +3,10 @@ import { getDb } from "@/lib/db";
 import { recentActivityFull } from "@/lib/content/stats";
 import { EmptyState, formatDate, PageHeader } from "@/components/admin/ui";
 
+// Private, session-gated page that is never prerendered; Next's instant-navigation validation (which flags every
+// session/params/searchParams read) does not apply. Blocking on the server is the intended behaviour here.
+export const instant = false;
+
 export default async function ActivityPage() {
   await requireAdmin("content:read");
   const rows = await recentActivityFull(await getDb(), 100);

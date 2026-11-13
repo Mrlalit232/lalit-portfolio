@@ -5,6 +5,10 @@ import { entities, type ContentType } from "@/lib/content/registry";
 import { searchAll } from "@/lib/content/stats";
 import { EmptyState, formatDate, PageHeader, StatusBadge } from "@/components/admin/ui";
 
+// Private, session-gated page that is never prerendered; Next's instant-navigation validation (which flags every
+// session/params/searchParams read) does not apply. Blocking on the server is the intended behaviour here.
+export const instant = false;
+
 export default async function SearchPage({ searchParams }: PageProps<"/admin/search">) {
   await requireAdmin("content:read");
   const sp = await searchParams;

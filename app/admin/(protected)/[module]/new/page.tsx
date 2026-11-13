@@ -6,6 +6,10 @@ import { entityByModule } from "@/lib/content/registry";
 import { ContentForm } from "@/components/admin/ContentForm";
 import { PageHeader } from "@/components/admin/ui";
 
+// Private, session-gated page that is never prerendered; Next's instant-navigation validation (which flags every
+// session/params/searchParams read) does not apply. Blocking on the server is the intended behaviour here.
+export const instant = false;
+
 export default async function NewItem({ params }: PageProps<"/admin/[module]/new">) {
   const user = await requireAdmin("content:write");
   const { module } = await params;

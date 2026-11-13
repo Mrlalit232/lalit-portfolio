@@ -1,5 +1,6 @@
 import "server-only";
 import { cache } from "react";
+import { connection } from "next/server";
 import { cookies } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 import { getDb } from "@/lib/db";
@@ -9,6 +10,8 @@ import { validateSession } from "./sessions";
 
 /** Resolves the signed-in user from the session cookie. Memoised per request. */
 export const getSession = cache(async () => {
+  // Sessions are inherently per-request (and compare against the current time), so opt out of prerendering explicitly.
+  await connection();
   const token = (await cookies()).get(SESSION_COOKIE)?.value;
   if (!token) return null;
   return validateSession(await getDb(), token);
