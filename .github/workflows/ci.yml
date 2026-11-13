@@ -35,7 +35,9 @@ jobs:
           cache: npm
 
       - name: Install dependencies (lockfile only)
-        run: npm ci
+        run: |
+          echo "::notice::node $(node -v) npm $(npm -v)"
+          npm ci || { s=$?; for f in ~/.npm/_logs/*.log; do grep -E " error | ERR|verbose stack|code |errno" "$f" | tail -25 | while IFS= read -r l; do echo "::error::${l:0:900}"; done; done; exit $s; }
 
       - name: Repository hygiene (no env files, databases or build output tracked)
         run: |
