@@ -1,4 +1,4 @@
-import { index, jsonb, pgEnum, pgTable, text, timestamp, uuid, boolean } from "drizzle-orm/pg-core";
+import { index, integer, jsonb, pgEnum, pgTable, text, timestamp, uuid, boolean } from "drizzle-orm/pg-core";
 
 /** Roles are stored from day one so permissions can be extended without schema changes. */
 export const roleEnum = pgEnum("role", ["owner", "editor"]);
@@ -12,6 +12,11 @@ export const users = pgTable("users", {
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   lastLoginAt: timestamp("last_login_at", { withTimezone: true }),
   disabledAt: timestamp("disabled_at", { withTimezone: true }),
+  /** AES-256-GCM encrypted TOTP secret (see lib/auth/totp.ts). Null = 2FA not set up. */
+  totpSecretEnc: text("totp_secret_enc"),
+  totpEnabledAt: timestamp("totp_enabled_at", { withTimezone: true }),
+  /** Last accepted TOTP time step, to reject replay of a code. */
+  totpLastStep: integer("totp_last_step"),
 });
 
 /** `id` is the SHA-256 hash of the cookie token; the raw token is never stored. */

@@ -23,6 +23,8 @@ export const contentItems = pgTable(
     draft: jsonb("draft").$type<Record<string, unknown> | null>(),
     sortOrder: integer("sort_order").notNull().default(0),
     publishedAt: timestamp("published_at", { withTimezone: true }),
+    /** Scheduled publishing: when set (and in the past) a draft is published automatically. */
+    publishAt: timestamp("publish_at", { withTimezone: true }),
     deletedAt: timestamp("deleted_at", { withTimezone: true }),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
