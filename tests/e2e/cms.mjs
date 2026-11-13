@@ -215,6 +215,18 @@ await toast("Duplicated as a draft");
 await page.waitForTimeout(800);
 log((await page.getByText("GenIQ (copy)").count()) > 0, "duplicate creates a '(copy)' draft");
 log(!(await pub("/projects")).html.includes("GenIQ (copy)"), "the duplicate is not public until published");
+// cleanup: remove the duplicate so later suites start from the seeded state
+await page.locator("#admin-main ul li:visible").filter({ hasText: "GenIQ (copy)" }).first().locator('summary[aria-label^="Actions for this"]').click();
+await page.getByRole("menuitem", { name: "Move to Trash" }).click();
+await confirmDialog("Move to Trash");
+await toast("Trash");
+await page.goto(BASE + "/admin/projects?status=trash", { waitUntil: "networkidle" });
+await page.locator("#admin-main ul li:visible").filter({ hasText: "GenIQ (copy)" }).first().locator('summary[aria-label^="Actions for this"]').click();
+await page.getByRole("menuitem", { name: "Delete forever" }).click();
+await confirmDialog("Delete forever");
+await toast("Deleted permanently");
+await page.goto(BASE + "/admin/projects", { waitUntil: "networkidle" });
+log((await page.getByText("GenIQ (copy)").count()) === 0, "the duplicate was removed again (cleanup)");
 
 // ---------- testimonials: hidden until real + published ----------
 await page.goto(BASE + "/admin/testimonials/new", { waitUntil: "networkidle" });

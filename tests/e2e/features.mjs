@@ -232,8 +232,11 @@ log(true, "a wrong confirmation code is rejected");
 await page.getByLabel("6-digit code").fill(totp(secret, Date.now()));
 await page.getByRole("button", { name: "Turn on" }).click();
 await toast("Two-factor authentication is on");
-const codes = await page.locator("li.font-mono, ul.font-mono li, ul li.rounded-lg").allInnerTexts();
-const recovery = codes.map((c) => c.trim()).filter((c) => /^[A-Z2-9]{5}-[A-Z2-9]{5}$/.test(c));
+// Wait for the codes to render (the list appears together with the success state, but not necessarily in the same frame).
+await page.getByText("Recovery codes (each works once)").waitFor({ timeout: 20000 });
+const readCodes = async () => (await page.locator("li.font-mono, ul.font-mono li, ul li.rounded-lg").allInnerTexts()).map((c) => c.trim()).filter((c) => /^[A-Z2-9]{5}-[A-Z2-9]{5}$/.test(c));
+let recovery = await readCodes();
+for (let i = 0; i < 20 && recovery.length < 10; i++) { await sleep(300); recovery = await readCodes(); }
 log(recovery.length === 10, `10 recovery codes are shown once (${recovery.length})`);
 
 // sign out, then sign in again: password alone must not be enough

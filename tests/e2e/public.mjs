@@ -107,7 +107,8 @@ for (const w of widths) {
   await page.getByLabel("Message").fill("This is a valid test message for QA purposes.");
   await page.getByRole("button", { name: "Send message" }).click();
   await page.waitForTimeout(1200);
-  const txt = await page.locator("form").first().innerText().catch(() => "");
+  // After a successful submit the form is replaced by the confirmation panel, so read the whole main area.
+  const txt = await page.locator("main").innerText().catch(() => "");
   // With a database the message is SAVED to the admin inbox, so an honest success is "received and saved".
   // It must never claim the message was emailed when no email provider is configured.
   log(/Message received/.test(txt) && /received and saved/i.test(txt) && !/has been sent/i.test(txt), "no email provider + database => honest 'received and saved' (not 'sent')");
