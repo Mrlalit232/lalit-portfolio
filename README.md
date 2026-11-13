@@ -107,11 +107,14 @@ but there is no user-management screen); password recovery is by command line (t
 | `npm run lint` / `npx tsc --noEmit` | ESLint and TypeScript |
 | `npm test` | Unit and integration tests against a real in-memory Postgres (auth, content engine, SEO helpers) |
 | `npm run test:seo` | SEO and indexability audit of a running build (titles, descriptions, canonicals, Open Graph, JSON-LD, sitemap, robots, 404s, internal links) |
+| `npm run test:a11y` | WCAG 2.2 AA audit with axe-core: every public page at 375 and 1440 px, the open mobile menu, and the admin screens in both themes |
+| `npm run test:security` | Attack scenarios: anonymous access, owner-only action replay, stored XSS (incl. a JSON-LD breakout), SQL injection, path traversal, malformed requests, unsafe uploads, headers |
 | `npm run test:smoke` | Quick route check: every admin and public route renders without errors (needs the throwaway database, see `tests/e2e/README.md`) |
 | `npm run test:e2e` | Browser tests (Playwright + Chrome): admin auth and security, Owner/Editor permission enforcement (Server Action replay), CMS CRUD and publish flow, Ventures, public site at nine widths. See `tests/e2e/README.md` |
 
 The browser tests run only against a throwaway database created by `npm run e2e:setup`, which refuses to touch
-your real local database or any hosted database.
+your real local database or any hosted database. They also refuse to run unless `BASE_URL` is set explicitly, so they can
+never be pointed at your everyday dev server by accident.
 
 ## Production build and start
 
@@ -129,5 +132,33 @@ Content lives in the database, so back that up, not the code. On Neon use point-
 before risky changes create a Neon branch. For the local database, copy the `.data/pglite` folder while no
 process is using it. The activity log and Trash (soft delete) cover accidental edits; `npm run db:seed` never
 overwrites existing content. Secrets live only in `.env.local` (git-ignored) or the hosting dashboard.
+
+## Looking inside the database
+
+There is no database studio (`npm run db:studio` does not exist, and none is needed). `npm run db:info` prints which database it
+targets, the applied migrations and a row count per table plus content by type and status. It only runs `SELECT`s. For the local
+database stop `next dev` first (the embedded database allows one process at a time).
+
+## Architecture in one minute
+
+- `app/(site)` is the public site (server components, content from the database through a tagged cache, falling back to `data/`).
+  `app/admin` is the private CMS (every page and action calls `requireAdmin(permission)`). `proxy.ts` handles admin redirects,
+  CMS redirects, real 404s for unknown project slugs and invalid preview links.
+- `lib/content` is the content engine (schemas, registry, service, revisions, scheduling, preview, bulk, public reads);
+  `lib/auth` is authentication (argon2id, hashed sessions, throttling, TOTP); `lib/media`, `lib/messages`, `lib/redirects`,
+  `lib/settings`, `lib/analytics` are the other CMS modules. `db/` holds the Drizzle schema and additive SQL migrations.
+
+## Troubleshooting
+
+| Problem | Fix |
+|---|---|
+| `Missing script: db:studio` | It does not exist. Use `npm run db:info`. |
+| A script or test cannot open the local database | Only one process can use `.data/pglite`. Stop `next dev` (and any test server) first. |
+| `npm run admin:create` says the tables are missing | Run `npm run setup:local` first. After pulling new code, run it again to apply new migrations, then `npm run db:seed`. |
+| Port 3000 is busy | Another dev server is running. Use `npm run dev -- -p 3001`, or stop the other one. |
+| The site shows old content after an edit | Published content is cached for about a minute; admin saves refresh it immediately. Hard-refresh once. |
+| Tests say `BASE_URL is not set` | Intended: start the throwaway test server (see `tests/e2e/README.md`) and set `BASE_URL` to it. |
+| Locked out of the admin | `npm run admin:reset-password` (and `npm run admin:reset-2fa` if you lost your authenticator and recovery codes). |
+| `next dev` edits `AGENTS.md` or `tsconfig.json` | Normal framework behaviour; review the diff and commit or discard it. |
 
 More: `docs/cms-architecture.md`, `docs/seo-strategy.md`, `docs/security.md`.

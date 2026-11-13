@@ -30,6 +30,13 @@ This is an honest account of what is protected, what was tested, and what remain
   after the password step a short-lived signed marker (no session) leads to the verify step, which is rate limited per
   account and per IP; ten single-use recovery codes are stored only as keyed hashes and shown once; turning 2FA off or
   regenerating codes needs the password AND a valid code, also rate limited. Lost-device recovery is a command-line reset.
+- **Hostile input**: NUL characters (which Postgres cannot store and which previously made an admin search fail) are stripped at every
+  input boundary; search and filter text is escaped so `%` and `_` are literal; the framework is not advertised in an
+  `X-Powered-By` header.
+- **Security tests** (`npm run test:security`, throwaway database): anonymous access, forged cookies, owner-only action replay by an Editor
+  and anonymous caller (with an Owner control), stored XSS in project fields and contact messages (including a `</script>` breakout in
+  JSON-LD), SQL-injection and wildcard strings, path traversal, malformed bodies, oversized and disguised uploads, security
+  headers and error-response leakage.
 - **File uploads**: authenticated, `media:write` only, at most 4 files of 3 MB per request. The type is decided from the
   file's magic bytes (PNG, JPEG, GIF, WebP, PDF only; SVG and anything scriptable is refused), the extension comes from the
   verified type, filenames are sanitised, alt text is stripped of markup, and files are served with the stored type,
