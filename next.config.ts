@@ -1,4 +1,11 @@
 import type { NextConfig } from "next";
+import { buildCsp } from "./lib/csp";
+
+const siteIsHttps = (process.env.NEXT_PUBLIC_SITE_URL ?? "").startsWith("https://");
+const contentSecurityPolicy = buildCsp({
+  dev: process.env.NODE_ENV === "development",
+  upgradeInsecure: process.env.NODE_ENV === "production" && siteIsHttps,
+});
 
 const nextConfig: NextConfig = {
   /* config options here */
@@ -29,6 +36,12 @@ const nextConfig: NextConfig = {
         ],
       },
       {
+        // Content-Security-Policy everywhere except /media: uploaded files set their own, stricter `sandbox` policy in the
+        // route handler, and a config header would override it.
+        source: "/((?!media/).*)",
+        headers: [{ key: "Content-Security-Policy", value: contentSecurityPolicy }],
+      },
+      {
         // Draft previews: never cached or indexed, and the URL (which contains the token) must not leak via Referer.
         source: "/preview/:path*",
         headers: [
@@ -43,10 +56,6 @@ const nextConfig: NextConfig = {
         headers: [
           { key: "Cache-Control", value: "no-store" },
           { key: "X-Robots-Tag", value: "noindex, nofollow" },
-          {
-            key: "Content-Security-Policy",
-            value: "frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'",
-          },
         ],
       },
     ];

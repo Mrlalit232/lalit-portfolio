@@ -3,6 +3,11 @@
 Playwright (`playwright-core`) driving your installed Google Chrome against a **production build**.
 They only ever use a throwaway database.
 
+**Easiest way: `npm run test:browser`.** It does everything below for you (throwaway database and secrets generated in memory,
+clean build in `.next-e2e`, production server on port 3130, SEO audit, all nine suites, server shutdown) and exits non-zero if
+anything fails. Options: `-- --suites=smoke,security`, `-- --skip-build`, `-- --port=3140`. CI runs exactly this. The manual
+steps below are for running a single suite against a server you started yourself.
+
 ```bash
 # 1. throwaway database (separate folder, throwaway password; refuses your real DB and hosted DBs)
 PGLITE_DIR=.data/e2e E2E_PASSWORD='choose-a-throwaway' npm run e2e:setup

@@ -1,0 +1,83 @@
+name: CI
+
+# Quality gate for every pull request and for main. There is deliberately NO deployment job:
+# deployment is a separate, manual owner decision (see docs/deployment.md).
+on:
+  pull_request:
+  push:
+    # main, plus feature branches so a push is checked before its pull request is opened.
+    branches: [main, "feature/**"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NEXT_TELEMETRY_DISABLED: "1"
+
+jobs:
+  quality:
+    name: Lint, typecheck, unit tests, build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies (lockfile only)
+        run: npm ci
+
+      - name: Repository hygiene (no env files, databases or build output tracked)
+        run: |
+          bad=$(git ls-files | grep -E '(^|/)\.env(\..*)?$|(^|/)\.data/|(^|/)\.next(-[a-z0-9]+)?/|\.tsbuildinfo$' | grep -v '^\.env\.example$' || true)
+          if [ -n "$bad" ]; then echo "Files that must never be committed:"; echo "$bad"; exit 1; fi
+
+      - name: ESLint
+        run: npm run lint
+
+      - name: Typecheck (next typegen, then tsc)
+        run: npm run typecheck
+
+      - name: Unit and integration tests (in-memory Postgres)
+        run: npm test
+
+      - name: Dependency audit (production dependencies, high and above)
+        run: npm run audit:prod
+
+      - name: Production build (no database and no secrets, as on a fresh clone)
+        env:
+          NEXT_PUBLIC_SITE_URL: https://ci.example.test
+        run: npm run build
+
+  browser:
+    name: Browser suites (SEO, accessibility, security, CMS, permissions)
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies (lockfile only)
+        run: npm ci
+
+      # Builds the site, creates a throwaway local database with throwaway secrets generated in memory,
+      # starts the production server and runs the SEO audit plus every browser suite.
+      # The runner image ships Google Chrome, which the tests drive through playwright-core.
+      - name: Browser test run
+        run: npm run test:browser

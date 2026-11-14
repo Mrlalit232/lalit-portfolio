@@ -89,10 +89,19 @@ export function encryptSecret(secretB32: string, authSecret: string) {
 export function decryptSecret(payload: string, authSecret: string) {
   const [v, iv, tag, ct] = payload.split(".");
   if (v !== "v1" || !iv || !tag || !ct) throw new Error("Bad secret format");
-  const d = createDecipheriv("aes-256-gcm", key(authSecret), Buffer.from(iv, "base64url"));
-  d.setAuthTag(Buffer.from(tag, "base64url"));
-  return Buffer.concat([d.update(Buffer.from(ct, "base64url")), d.final()]).toString("utf8");
+  try {
+    const d = createDecipheriv("aes-256-gcm", key(authSecret), Buffer.from(iv, "base64url"));
+    d.setAuthTag(Buffer.from(tag, "base64url"));
+    return Buffer.concat([d.update(Buffer.from(ct, "base64url")), d.final()]).toString("utf8");
+  } catch {
+    // Almost always: AUTH_SECRET was changed after two-factor authentication was set up (see docs/security.md).
+    throw new Error(SECRET_UNREADABLE);
+  }
 }
+
+/** Shown in server logs so the operator knows what to do (never includes any secret). */
+export const SECRET_UNREADABLE =
+  "The stored two-factor secret cannot be decrypted with the current AUTH_SECRET (it was probably changed or is wrong). Run `npm run admin:reset-2fa` for the affected account, then set up two-factor again.";
 
 /* ---- recovery codes ---- */
 const RC_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // no 0/O/1/I
